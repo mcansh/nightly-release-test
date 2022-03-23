@@ -1,12 +1,13 @@
 name: Deploy Nightly
 on:
+  workflow_dispatch:
   schedule:
     - cron: "*/1 * * * *" # every minute
 
 jobs:
   nightly:
     name: Nightly Release
-    # if: github.repository == 'mcansh/nightly-release-test'
+    if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
