@@ -1,0 +1,48 @@
+name: Deploy Nightly
+on:
+  schedule:
+    - cron: "*/5 * * * *" # every 5 minutes
+
+jobs:
+  nightly:
+    name: Nightly Release
+    if: github.repository == 'mcansh/nightly-release-test'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.NIGHTLY_PAT }}
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: "npm"
+          registry-url: "https://npm.pkg.github.com"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Update Version
+        run: |
+          SHORT_SHA=${GITHUB_SHA::7}
+          NEXT_VERSION=0.0.0-experimental-${SHORT_SHA}
+          npm version ${NEXT_VERSION}
+
+      - name: Commit version
+        run: |
+          git config --local user.email "hello@remix.run"
+          git config --local user.name "Remix Run Bot"
+          git checkout -b nightly/${NEXT_VERSION}
+          git add .
+          git commit -m "Version ${NEXT_VERSION}"
+          git push
+
+      - name: Publish
+        run: npm run publish --tag nightly
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
