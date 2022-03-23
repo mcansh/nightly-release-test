@@ -40,6 +40,6 @@ jobs:
           npm version ${NEXT_VERSION}
 
       - name: Publish
-        run: npm run publish --tag nightly
+        run: npm publish --tag nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
