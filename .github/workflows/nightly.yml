@@ -39,7 +39,9 @@ jobs:
           git checkout -b nightly/${NEXT_VERSION}
           npm version ${NEXT_VERSION}
 
+          git push origin nightly/${NEXT_VERSION} --follow-tags
+
       - name: Publish
-        run: npm publish
+        run: npm publish --tag nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
