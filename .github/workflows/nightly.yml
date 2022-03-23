@@ -39,7 +39,7 @@ jobs:
           git checkout -b nightly/${NEXT_VERSION}
           npm version ${NEXT_VERSION}
 
-          git push origin nightly/${NEXT_VERSION} --follow-tags
+          git push origin --tags
 
       - name: Publish
         run: npm publish --tag nightly
