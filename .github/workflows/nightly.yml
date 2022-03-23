@@ -2,7 +2,7 @@ name: Deploy Nightly
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/1 * * * *" # every minute
+    - cron: "* 18 * * *" # every day at 6PM UTC
 
 jobs:
   nightly:
