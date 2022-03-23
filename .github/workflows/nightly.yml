@@ -30,18 +30,14 @@ jobs:
 
       - name: Update Version
         run: |
-          SHORT_SHA=${GITHUB_SHA::7}
-          NEXT_VERSION=0.0.0-experimental-${SHORT_SHA}
-          git checkout -b nightly/${NEXT_VERSION}
-          npm version ${NEXT_VERSION}
-
-      - name: Commit version
-        run: |
           git config user.email "hello@remix.run"
           git config user.name "Remix Run Bot"
-          git add .
-          git commit -m "Version ${NEXT_VERSION}"
-          git push
+
+          SHORT_SHA=${GITHUB_SHA::7}
+          NEXT_VERSION=0.0.0-experimental-${SHORT_SHA}
+
+          git checkout -b nightly/${NEXT_VERSION}
+          npm version ${NEXT_VERSION}
 
       - name: Publish
         run: npm run publish --tag nightly
