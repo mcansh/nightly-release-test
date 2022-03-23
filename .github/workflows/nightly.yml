@@ -32,13 +32,13 @@ jobs:
         run: |
           SHORT_SHA=${GITHUB_SHA::7}
           NEXT_VERSION=0.0.0-experimental-${SHORT_SHA}
+          git checkout -b nightly/${NEXT_VERSION}
           npm version ${NEXT_VERSION}
 
       - name: Commit version
         run: |
-          git config --local user.email "hello@remix.run"
-          git config --local user.name "Remix Run Bot"
-          git checkout -b nightly/${NEXT_VERSION}
+          git config user.email "hello@remix.run"
+          git config user.name "Remix Run Bot"
           git add .
           git commit -m "Version ${NEXT_VERSION}"
           git push
