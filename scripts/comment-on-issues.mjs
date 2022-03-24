@@ -57,6 +57,17 @@ async function getCommitsSinceLastStable() {
   });
 
   for (let pr of prsBetweenReleases) {
+    let comment = await octokit.issues.createComment({
+      owner: "mcansh",
+      repo: "nightly-release-test",
+      issue_number: pr.number,
+      body: `
+      🤖 Hello there,\n\n
+      We just published version \`${latestRelease.tag_name}\` which includes this pull request. If you'd like to take it for a test run please try it out and let us know what you think!\n\n
+      Thanks!
+      `,
+    });
+
     let res = await graphqlWithAuth(gql`
       {
         resource(url: "${pr.html_url}") {
@@ -73,13 +84,17 @@ async function getCommitsSinceLastStable() {
 
     console.dir(res, { depth: null });
     for (let issue of res.resource.closingIssuesReferences.nodes) {
-      console.log(`commenting on issue ${issue.number}`);
-      await octokit.issues.createComment({
+      console.log(`commenting on issue #${issue.number}`);
+      let comment = await octokit.issues.createComment({
         owner: "mcansh",
         repo: "nightly-release-test",
         issue_number: issue.number,
-        body: `hey there, we just published a nightly version that should fix this, if you could give it a try, that'd be :ok-hand: \n\n to do so, update your \`@remix-run\` and \`remix\` packages to \`${latestRelease.tag_name}\``,
+        body: `🤖 Hello there,\n\n
+        We just published version \`${latestRelease.tag_name}\` which involves this issue. If you'd like to take it for a test run please try it out and let us know what you think!\n\n
+        Thanks!`,
       });
+
+      console.log(`comment created: ${comment.data.url}`);
     }
   }
 }
