@@ -17,8 +17,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.NIGHTLY_PAT }}
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -34,32 +32,9 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        
-      - name: Set up git
-        run: |
-          git config user.email "hello@remix.run"
-          git config user.name "Remix Run Bot"
-          
-      - name: Make a change
-        run: |
-          NOW=$(date +'%Y-%m-%d')
-          echo "console.log(\"greetings ${NOW}; stable release\");" > ./src/index.ts
-          git add .
-          git commit -m "chore: updated ${NOW}"
 
       - name: Build
         run: npm run build
-
-      - name: Update Version
-        id: version
-        run: |
-          NEXT_VERSION=$(npm version minor)
-          echo ::set-output name=NEXT_VERSION::${NEXT_VERSION}
-
-          git checkout -b nightly/${NEXT_VERSION}
-          npm version ${NEXT_VERSION}
-
-          git push origin --tags
 
       - name: Publish
         run: npm publish
