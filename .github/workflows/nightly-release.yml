@@ -43,7 +43,8 @@ jobs:
 
       - name: Update Version
         run: |
-          SHORT_SHA=${GITHUB_SHA::7}
+          SHA=$(git rev-parse HEAD)
+          SHORT_SHA=${SHA::7}
           NEXT_VERSION=0.0.0-nightly-${SHORT_SHA}
 
           git checkout -b nightly/${NEXT_VERSION}
