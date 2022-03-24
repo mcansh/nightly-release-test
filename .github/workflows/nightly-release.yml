@@ -25,15 +25,24 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        
+      - name: Make a change
+        run: |
+          NOW=$(date +'%Y-%m-%d')
+          echo "console.log(\"greetings ${NOW}\");" > ./src/index.ts
+          git add .
+          git commit -m "chore: updated ${NOW}"
+          
+      - name: Set up git
+        run: |
+          git config user.email "hello@remix.run"
+          git config user.name "Remix Run Bot"
 
       - name: Build
         run: npm run build
 
       - name: Update Version
         run: |
-          git config user.email "hello@remix.run"
-          git config user.name "Remix Run Bot"
-
           SHORT_SHA=${GITHUB_SHA::7}
           NEXT_VERSION=0.0.0-nightly-${SHORT_SHA}
 
