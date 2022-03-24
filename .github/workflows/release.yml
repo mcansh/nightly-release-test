@@ -71,5 +71,5 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: true
-          automatic_release_tag: ${{ steps.version.outputs.NEXT_VERSION }}
+          automatic_release_tag: v${{ steps.version.outputs.NEXT_VERSION }}
           
