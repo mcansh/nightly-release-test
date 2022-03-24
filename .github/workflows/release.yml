@@ -28,7 +28,9 @@ jobs:
           registry-url: "https://npm.pkg.github.com"
           
       - name: Log event
-        run: echo "${{ github.event.action }}"
+        run: |
+          echo "event name is:" ${{ github.event_name }} 
+          echo "event type is:" ${{ github.event.action }} 
 
       - name: Install dependencies
         run: npm install
