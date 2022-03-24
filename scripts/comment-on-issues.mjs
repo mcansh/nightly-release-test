@@ -62,9 +62,7 @@ async function getCommitsSinceLastStable() {
       repo: "nightly-release-test",
       issue_number: pr.number,
       body: `
-      🤖 Hello there,\n\n
-      We just published version \`${latestRelease.tag_name}\` which includes this pull request. If you'd like to take it for a test run please try it out and let us know what you think!\n\n
-      Thanks!
+      🤖 Hello there,\n\nWe just published version \`${latestRelease.tag_name}\` which includes this pull request. If you'd like to take it for a test run please try it out and let us know what you think!\n\nThanks!
       `,
     });
 
@@ -89,9 +87,7 @@ async function getCommitsSinceLastStable() {
         owner: "mcansh",
         repo: "nightly-release-test",
         issue_number: issue.number,
-        body: `🤖 Hello there,\n\n
-        We just published version \`${latestRelease.tag_name}\` which involves this issue. If you'd like to take it for a test run please try it out and let us know what you think!\n\n
-        Thanks!`,
+        body: `🤖 Hello there,\n\nWe just published version \`${latestRelease.tag_name}\` which involves this issue. If you'd like to take it for a test run please try it out and let us know what you think!\n\nThanks!`,
       });
 
       console.log(`comment created: ${comment.data.url}`);
