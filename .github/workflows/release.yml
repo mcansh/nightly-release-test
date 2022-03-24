@@ -17,8 +17,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-        with:
-          ref: dev
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -42,16 +40,6 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create GitHub release
-        uses: actions/create-release@v1
-        with:
-          draft: false
-          prerelease: false
-          release_name: v${{ steps.version.outputs.NEXT_VERSION }}
-          tag_name: v${{ steps.version.outputs.NEXT_VERSION }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Comment on issues
         run: node ./scripts/comment-on-issues.mjs
