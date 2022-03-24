@@ -41,7 +41,10 @@ async function getCommitsSinceLastStable() {
     throw new Error("Could not find latest release");
   }
 
-  if (lastStable.target_commitish === latestRelease.target_commitish) {
+  if (
+    latestRelease.prerelease === false &&
+    lastStable.target_commitish === latestRelease.target_commitish
+  ) {
     console.log("No commits since last stable release");
     return;
   }
