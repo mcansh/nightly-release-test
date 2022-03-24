@@ -1,15 +1,19 @@
-name: Deploy Nightly
+name: release
+
 on:
   workflow_dispatch:
   schedule:
     # - cron: "0 21 * * *" # every day at 7PM EST
     - cron: "*/20 * * * *" # every 20 minutes
+  release:
+    types: [published]
 
 jobs:
   nightly:
     name: Nightly Release
     if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -22,6 +26,9 @@ jobs:
           node-version: 16
           cache: "npm"
           registry-url: "https://npm.pkg.github.com"
+          
+      - name: Log event
+        run: echo "${{ github.event.action }}"
 
       - name: Install dependencies
         run: npm install
@@ -42,10 +49,12 @@ jobs:
         run: npm run build
 
       - name: Update Version
+        id: version
         run: |
           SHA=$(git rev-parse HEAD)
           SHORT_SHA=${SHA::7}
           NEXT_VERSION=0.0.0-nightly-${SHORT_SHA}
+          echo ::set-output name=NEXT_VERSION::${NEXT_VERSION}
 
           git checkout -b nightly/${NEXT_VERSION}
           npm version ${NEXT_VERSION}
@@ -56,3 +65,12 @@ jobs:
         run: npm publish --tag nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Create GitHub release
+        uses: marvinpinto/action-automatic-releases@v1.2.1
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: true
+          automatic_release_tag: "nightly"
+          title: ${{ steps.version.outputs.NEXT_VERSION }}
+          
