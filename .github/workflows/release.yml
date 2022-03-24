@@ -54,7 +54,6 @@ jobs:
           SHA=$(git rev-parse HEAD)
           SHORT_SHA=${SHA::7}
           NEXT_VERSION=0.0.0-nightly-${SHORT_SHA}
-          echo ::set-output name=NEXT_VERSION::${NEXT_VERSION}
 
           git checkout -b nightly/${NEXT_VERSION}
           npm version ${NEXT_VERSION}
@@ -72,5 +71,4 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: true
           automatic_release_tag: "nightly"
-          title: ${{ steps.version.outputs.NEXT_VERSION }}
           
