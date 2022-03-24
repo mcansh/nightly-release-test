@@ -42,7 +42,7 @@ async function getCommitsSinceLastStable() {
   }
 
   if (
-    latestRelease.prerelease === false &&
+    latestRelease.prerelease === true &&
     lastStable.target_commitish === latestRelease.target_commitish
   ) {
     console.log("No commits since last stable release");
