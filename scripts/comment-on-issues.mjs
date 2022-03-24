@@ -57,15 +57,11 @@ async function getCommitsSinceLastStable() {
   });
 
   for (let pr of prsBetweenReleases) {
-    let comment = await octokit.issues.createComment({
+    await octokit.issues.createComment({
       owner: "mcansh",
       repo: "nightly-release-test",
       issue_number: pr.number,
-      body: `
-      🤖 Hello there,\n\n
-      We just published version \`${latestRelease.tag_name}\` which includes this pull request. If you'd like to take it for a test run please try it out and let us know what you think!\n\n
-      Thanks!
-      `,
+      body: `🤖 Hello there,\n\nWe just published version \`${latestRelease.tag_name}\` which includes this pull request. If you'd like to take it for a test run please try it out and let us know what you think!\n\nThanks!`,
     });
 
     let res = await graphqlWithAuth(gql`
@@ -85,16 +81,12 @@ async function getCommitsSinceLastStable() {
     console.dir(res, { depth: null });
     for (let issue of res.resource.closingIssuesReferences.nodes) {
       console.log(`commenting on issue #${issue.number}`);
-      let comment = await octokit.issues.createComment({
+      await octokit.issues.createComment({
         owner: "mcansh",
         repo: "nightly-release-test",
         issue_number: issue.number,
-        body: `🤖 Hello there,\n\n
-        We just published version \`${latestRelease.tag_name}\` which involves this issue. If you'd like to take it for a test run please try it out and let us know what you think!\n\n
-        Thanks!`,
+        body: `🤖 Hello there,\n\nWe just published version \`${latestRelease.tag_name}\` which involves this issue. If you'd like to take it for a test run please try it out and let us know what you think!\n\nThanks!`,
       });
-
-      console.log(`comment created: ${comment.data.url}`);
     }
   }
 }
