@@ -53,6 +53,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
+      - name: Comment on issues
+        run: node ./scripts/comment-on-issues.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
   nightly:
     name: Nightly Release
     if: github.repository == 'mcansh/nightly-release-test' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
