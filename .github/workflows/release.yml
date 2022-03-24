@@ -67,9 +67,12 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Create GitHub release
-        uses: marvinpinto/action-automatic-releases@v1.2.1
+        uses: actions/create-release@v1
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: true
-          automatic_release_tag: v${{ steps.version.outputs.NEXT_VERSION }}
+          draft: false
+          prerelease: false
+          release_name: v${{ steps.version.outputs.NEXT_VERSION }}
+          tag_name: v${{ steps.version.outputs.NEXT_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
           
