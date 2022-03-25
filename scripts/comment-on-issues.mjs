@@ -30,7 +30,6 @@ async function commentOnIssuesAndPrsAboutRelease() {
     });
 
     let issuesClosed = await getIssuesClosedByPullRequests(pr.html_url);
-    console.dir(issuesClosed, { depth: null });
 
     for (let issue of issuesClosed) {
       console.log(`commenting on issue #${issue.number}`);
