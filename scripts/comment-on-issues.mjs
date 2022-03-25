@@ -2,7 +2,7 @@ import invariant from "tiny-invariant";
 import {
   commentOnIssue,
   commentOnPullRequest,
-  getDefaultBranch,
+  getIssuesClosedByPullRequests,
   prsMergedSinceStable,
 } from "./octokit.mjs";
 
@@ -12,10 +12,16 @@ invariant(process.env.GITHUB_REPOSITORY, "GITHUB_REPOSITORY is required");
 const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
 
 async function commentOnIssuesAndPrsAboutRelease() {
-  let defaultBranch = await getDefaultBranch({ owner, repo });
-  invariant(defaultBranch, "Could not find default branch");
+  let { latestRelease, pullRequests } = await prsMergedSinceStable({
+    owner,
+    repo,
+  });
 
-  let pullRequests = await prsMergedSinceStable({ owner, repo, defaultBranch });
+  console.log(
+    `Found ${pullRequests.length} PR${
+      pullRequests.length === 1 ? "" : "s"
+    } merged since stable`
+  );
 
   console.log(
     `Found ${pullRequests.length} PR${
@@ -24,11 +30,12 @@ async function commentOnIssuesAndPrsAboutRelease() {
   );
 
   for (let pr of pullRequests) {
+    console.log(`commenting on pr #${pr.number}`);
     await commentOnPullRequest({
       owner,
       repo,
-      issue_number: pr.number,
-      version: latestRelease.tag_name,
+      pr: pr.number,
+      version: latestRelease,
     });
 
     let issuesClosed = await getIssuesClosedByPullRequests(pr.html_url);
@@ -40,7 +47,7 @@ async function commentOnIssuesAndPrsAboutRelease() {
         issue: issue.number,
         owner,
         repo,
-        version: latestRelease.tag_name,
+        version: latestRelease,
       });
     }
   }

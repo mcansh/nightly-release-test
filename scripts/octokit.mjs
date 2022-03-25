@@ -14,7 +14,7 @@ let gql = String.raw;
 const Octokit = RestOctokit.plugin(paginateRest);
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-export async function prsMergedSinceStable({ owner, repo, defaultBranch }) {
+export async function prsMergedSinceStable({ owner, repo }) {
   let releases = await octokit.paginate(octokit.rest.repos.listReleases, {
     owner,
     repo,
@@ -47,11 +47,16 @@ export async function prsMergedSinceStable({ owner, repo, defaultBranch }) {
     direction: "desc",
   });
 
-  return prs.filter((pullRequest) => {
+  let pullRequests = prs.filter((pullRequest) => {
     if (!pullRequest.merged_at) return false;
     let mergedDate = new Date(pullRequest.merged_at);
     return mergedDate > startDate && mergedDate < endDate;
   });
+
+  return {
+    pullRequests,
+    latestRelease: latestRelease.tag_name,
+  };
 }
 
 export async function commentOnPullRequest({ owner, repo, pr, version }) {
@@ -88,9 +93,4 @@ export async function getIssuesClosedByPullRequests(prHtmlUrl) {
   `);
 
   return res?.resource?.closingIssuesReferences?.nodes;
-}
-
-export async function getDefaultBranch({ owner, repo }) {
-  let response = await octokit.repos.get({ owner, repo });
-  return response.data.default_branch;
 }
