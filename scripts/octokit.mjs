@@ -36,45 +36,10 @@ export async function prsMergedSinceStable({ owner, repo, defaultBranch }) {
   let latestRelease = sorted.at(0);
   invariant(latestRelease, "Could not find latest release");
 
-  if (lastStable.target_commitish === defaultBranch) {
-    let commit = await octokit.rest.repos.getCommit({
-      owner,
-      repo,
-      ref: defaultBranch,
-    });
-    lastStable.target_commitish = commit.data.sha;
-  }
+  let startDate = new Date(lastStable.created_at);
+  let endDate = new Date(latestRelease.created_at);
 
-  console.log({
-    lastStable: lastStable.target_commitish,
-    latestRelease: latestRelease.target_commitish,
-  });
-
-  if (
-    latestRelease.prerelease === true &&
-    lastStable.target_commitish === latestRelease.target_commitish
-  ) {
-    console.log("No commits since last stable release");
-    return [];
-  }
-
-  let [startCommit, endCommit] = await Promise.all([
-    octokit.repos.getCommit({
-      owner,
-      repo,
-      sha: lastStable.target_commitish,
-    }),
-    octokit.repos.getCommit({
-      owner,
-      repo,
-      sha: latestRelease.target_commitish,
-    }),
-  ]);
-
-  let startDate = new Date(startCommit.commit.committer.date);
-  let endDate = new Date(endCommit.data.commit.committer.date);
-
-  const prs = await octokit.paginate(octokit.pullRequests.getAll, {
+  const prs = await octokit.paginate(octokit.pulls.list, {
     owner,
     repo,
     state: "closed",
