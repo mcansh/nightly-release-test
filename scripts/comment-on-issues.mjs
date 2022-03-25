@@ -3,7 +3,7 @@ import {
   commentOnIssue,
   commentOnPullRequest,
   getIssuesClosedByPullRequests,
-  prsMergedSinceStable,
+  prsMergedSinceLast,
 } from "./octokit.mjs";
 
 invariant(process.env.GITHUB_TOKEN, "GITHUB_TOKEN is required");
@@ -12,13 +12,15 @@ invariant(process.env.GITHUB_REPOSITORY, "GITHUB_REPOSITORY is required");
 const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
 
 async function commentOnIssuesAndPrsAboutRelease() {
-  let { latestRelease, pullRequests } = await prsMergedSinceStable({
+  let { latestRelease, pullRequests } = await prsMergedSinceLast({
     owner,
     repo,
   });
 
   let suffix = pullRequests.length === 1 ? "" : "s";
-  console.log(`Found ${pullRequests.length} PR${suffix} merged since stable`);
+  console.log(
+    `Found ${pullRequests.length} PR${suffix} merged since last release`
+  );
 
   for (let pr of pullRequests) {
     console.log(`commenting on pr #${pr.number}`);

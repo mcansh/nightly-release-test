@@ -14,7 +14,7 @@ let gql = String.raw;
 const Octokit = RestOctokit.plugin(paginateRest);
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-export async function prsMergedSinceStable({ owner, repo }) {
+export async function prsMergedSinceLast({ owner, repo }) {
   let releases = await octokit.paginate(octokit.rest.repos.listReleases, {
     owner,
     repo,
@@ -25,18 +25,13 @@ export async function prsMergedSinceStable({ owner, repo }) {
     return new Date(b.published_at) - new Date(a.published_at);
   });
 
-  // we sorted, so we can safely assume the first one we find is the latest stable
-  let lastStableIndex = sorted.findIndex((release) => {
-    return release.prerelease === false && release.draft === false;
-  });
-
-  let lastStable = sorted.at(lastStableIndex);
-  invariant(lastStable, "Could not find last stable release");
-
   let latestRelease = sorted.at(0);
   invariant(latestRelease, "Could not find latest release");
 
-  let startDate = new Date(lastStable.created_at);
+  let previousRelease = sorted.at(1);
+  invariant(previousRelease, "Could not find previous release");
+
+  let startDate = new Date(previousRelease.created_at);
   let endDate = new Date(latestRelease.created_at);
 
   const prs = await octokit.paginate(octokit.pulls.list, {
