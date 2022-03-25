@@ -17,6 +17,12 @@ async function commentOnIssuesAndPrsAboutRelease() {
 
   let pullRequests = await prsMergedSinceStable({ owner, repo, defaultBranch });
 
+  console.log(
+    `Found ${pullRequests.length} PR${
+      pullRequests.length === 1 ? "" : "s"
+    } merged since stable`
+  );
+
   for (let pr of pullRequests) {
     await commentOnPullRequest({
       owner,
@@ -26,8 +32,8 @@ async function commentOnIssuesAndPrsAboutRelease() {
     });
 
     let issuesClosed = await getIssuesClosedByPullRequests(pr.html_url);
+    console.dir(issuesClosed, { depth: null });
 
-    console.dir(res, { depth: null });
     for (let issue of issuesClosed) {
       console.log(`commenting on issue #${issue.number}`);
       await commentOnIssue({
