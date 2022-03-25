@@ -17,17 +17,8 @@ async function commentOnIssuesAndPrsAboutRelease() {
     repo,
   });
 
-  console.log(
-    `Found ${pullRequests.length} PR${
-      pullRequests.length === 1 ? "" : "s"
-    } merged since stable`
-  );
-
-  console.log(
-    `Found ${pullRequests.length} PR${
-      pullRequests.length === 1 ? "" : "s"
-    } merged since stable`
-  );
+  let suffix = pullRequests.length === 1 ? "" : "s";
+  console.log(`Found ${pullRequests.length} PR${suffix} merged since stable`);
 
   for (let pr of pullRequests) {
     console.log(`commenting on pr #${pr.number}`);
