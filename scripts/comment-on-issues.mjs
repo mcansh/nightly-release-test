@@ -1,10 +1,14 @@
-import { Octokit } from "@octokit/rest";
+import { Octokit as RestOctokit } from "@octokit/rest";
 import { graphql } from "@octokit/graphql";
+import {
+  paginateRest,
+  composePaginateRest,
+} from "@octokit/plugin-paginate-rest";
 import prsMergedSince from "prs-merged-since";
 
-const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN,
-});
+const Octokit = RestOctokit.plugin(paginateRest);
+
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 const graphqlWithAuth = graphql.defaults({
   headers: {
@@ -15,12 +19,13 @@ const graphqlWithAuth = graphql.defaults({
 let gql = String.raw;
 
 async function getCommitsSinceLastStable() {
-  let releases = await octokit.rest.repos.listReleases({
+  let releases = await octokit.paginate(octokit.rest.repos.listReleases, {
     owner: "mcansh",
     repo: "nightly-release-test",
+    per_page: 100,
   });
 
-  let sorted = releases.data.sort((a, b) => {
+  let sorted = releases.sort((a, b) => {
     return new Date(b.published_at) - new Date(a.published_at);
   });
 
@@ -71,7 +76,7 @@ async function getCommitsSinceLastStable() {
       {
         resource(url: "${pr.html_url}") {
           ... on PullRequest {
-            closingIssuesReferences(first: 10) {
+            closingIssuesReferences(first: 100) {
               nodes {
                 number
               }
