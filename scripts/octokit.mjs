@@ -13,7 +13,11 @@ const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
 const gql = String.raw;
 
-export async function prsMergedSinceLast({ owner, repo, lastRelease }) {
+export async function prsMergedSinceLast({
+  owner,
+  repo,
+  lastRelease: lastReleaseVersion,
+}) {
   let releases = await octokit.paginate(octokit.rest.repos.listReleases, {
     owner,
     repo,
@@ -24,16 +28,33 @@ export async function prsMergedSinceLast({ owner, repo, lastRelease }) {
     return new Date(b.published_at) - new Date(a.published_at);
   });
 
+  sorted[0].prerelease;
+
   let lastReleaseIndex = sorted.findIndex((release) => {
-    return release.tag_name === lastRelease;
+    return release.tag_name === lastReleaseVersion;
   });
 
+  let lastRelease = sorted[lastReleaseIndex];
   invariant(
-    lastReleaseIndex,
+    lastRelease,
     `Could not find last release ${lastRelease} in ${GITHUB_REPOSITORY}`
   );
 
-  let previousRelease = sorted.at(lastReleaseIndex + 1);
+  // if the lastRelease was a stable release, then we want to find the previous stable release
+  let previousReleaseIndex;
+  if (lastRelease.prerelease === false) {
+    let minusLatestRelease = [
+      ...sorted.slice(0, lastReleaseIndex),
+      ...sorted.slice(lastReleaseIndex + 1),
+    ];
+    previousReleaseIndex = minusLatestRelease.findIndex((release) => {
+      return release.prerelease === false;
+    });
+  } else {
+    previousReleaseIndex = lastReleaseIndex + 1;
+  }
+
+  let previousRelease = sorted.at(previousReleaseIndex);
   invariant(
     previousRelease,
     `Could not find previous release in ${GITHUB_REPOSITORY}`
