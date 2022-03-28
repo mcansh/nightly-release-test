@@ -40,13 +40,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Comment on issues
-        run: node ./scripts/comment-on-issues.mjs
-        env:
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_TOKEN: ${{ github.token }}
-          GITHUB_REF: ${{ github.ref }}
-
   nightly:
     name: Nightly Release
     if: github.repository == 'mcansh/nightly-release-test' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
@@ -117,6 +110,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
+  "comment-on-nightly":
+    name: Comment on Nightly Release
+    if: github.repository == 'mcansh/nightly-release-test'
+    runs-on: ubuntu-latest
+    needs: [nightly]
+    steps:
+      - name: Comment on issues
+        run: node ./scripts/comment-on-issues.mjs
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REF: ${{ github.ref }}
+
+  "comment-on-stable":
+    name: Comment on Nightly Release
+    if: github.repository == 'mcansh/nightly-release-test'
+    runs-on: ubuntu-latest
+    needs: [stable]
+    steps:
       - name: Comment on issues
         run: node ./scripts/comment-on-issues.mjs
         env:
