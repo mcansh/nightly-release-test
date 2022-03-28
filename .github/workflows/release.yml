@@ -51,7 +51,7 @@ jobs:
         id: nightly
         run: |
           count=$(git rev-list $GITHUB_SHA..HEAD --count)
-          if [ "$count" --tags "0" ]; then
+          if [ "$count" -gt "0" ]; then
             echo "::set-output name=RELEASE::true"
           else
             echo "::set-output name=release::false"
