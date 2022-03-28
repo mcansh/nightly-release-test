@@ -98,4 +98,4 @@ jobs:
           release_name: v${{ steps.version.outputs.NEXT_VERSION }}
           tag_name: v${{ steps.version.outputs.NEXT_VERSION }}
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.NIGHTLY_PAT }}
