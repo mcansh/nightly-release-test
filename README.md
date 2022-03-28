@@ -1,3 +1,1 @@
 # nightly-release-test
-
-👍
