@@ -43,6 +43,7 @@ jobs:
       - name: Comment on issues
         run: node ./scripts/comment-on-issues.mjs
         env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
 
   nightly:
@@ -118,4 +119,5 @@ jobs:
       - name: Comment on issues
         run: node ./scripts/comment-on-issues.mjs
         env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
