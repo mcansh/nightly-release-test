@@ -1,6 +1,6 @@
 {
   "name": "@mcansh/nightly-release-test",
-  "version": "0.11.0",
+  "version": "0.0.0-nightly-8e1981b",
   "description": "",
   "main": "index.js",
   "scripts": {
