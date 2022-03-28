@@ -45,6 +45,7 @@ jobs:
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REF: ${{ github.ref }}
 
   nightly:
     name: Nightly Release
@@ -121,3 +122,4 @@ jobs:
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REF: ${{ github.ref }}
