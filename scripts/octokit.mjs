@@ -2,19 +2,18 @@ import { Octokit as RestOctokit } from "@octokit/rest";
 import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { graphql } from "@octokit/graphql";
 import invariant from "tiny-invariant";
+import { GITHUB_TOKEN, GITHUB_REPOSITORY } from "./constants.mjs";
 
 const graphqlWithAuth = graphql.defaults({
-  headers: {
-    authorization: `token ${process.env.GITHUB_TOKEN}`,
-  },
+  headers: { authorization: `token ${GITHUB_TOKEN}` },
 });
 
-let gql = String.raw;
-
 const Octokit = RestOctokit.plugin(paginateRest);
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
-export async function prsMergedSinceLast({ owner, repo }) {
+const gql = String.raw;
+
+export async function prsMergedSinceLast({ owner, repo, lastRelease }) {
   let releases = await octokit.paginate(octokit.rest.repos.listReleases, {
     owner,
     repo,
@@ -25,14 +24,23 @@ export async function prsMergedSinceLast({ owner, repo }) {
     return new Date(b.published_at) - new Date(a.published_at);
   });
 
-  let latestRelease = sorted.at(0);
-  invariant(latestRelease, "Could not find latest release");
+  let lastReleaseIndex = sorted.findIndex((release) => {
+    return release.tag_name === lastRelease;
+  });
 
-  let previousRelease = sorted.at(1);
-  invariant(previousRelease, "Could not find previous release");
+  invariant(
+    lastReleaseIndex,
+    `Could not find last release ${lastRelease} in ${GITHUB_REPOSITORY}`
+  );
+
+  let previousRelease = sorted.at(lastReleaseIndex + 1);
+  invariant(
+    previousRelease,
+    `Could not find previous release in ${GITHUB_REPOSITORY}`
+  );
 
   let startDate = new Date(previousRelease.created_at);
-  let endDate = new Date(latestRelease.created_at);
+  let endDate = new Date(lastRelease.created_at);
 
   const prs = await octokit.paginate(octokit.pulls.list, {
     owner,
@@ -42,16 +50,11 @@ export async function prsMergedSinceLast({ owner, repo }) {
     direction: "desc",
   });
 
-  let pullRequests = prs.filter((pullRequest) => {
+  return prs.filter((pullRequest) => {
     if (!pullRequest.merged_at) return false;
     let mergedDate = new Date(pullRequest.merged_at);
     return mergedDate > startDate && mergedDate < endDate;
   });
-
-  return {
-    pullRequests,
-    latestRelease: latestRelease.tag_name,
-  };
 }
 
 export async function commentOnPullRequest({ owner, repo, pr, version }) {

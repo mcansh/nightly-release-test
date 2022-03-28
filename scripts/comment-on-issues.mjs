@@ -5,18 +5,14 @@ import {
   getIssuesClosedByPullRequests,
   prsMergedSinceLast,
 } from "./octokit.mjs";
-
-invariant(process.env.GITHUB_TOKEN, "GITHUB_TOKEN is required");
-invariant(process.env.GITHUB_REPOSITORY, "GITHUB_REPOSITORY is required");
-
-const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+import { LATEST_RELEASE, OWNER, REPO } from "./constants.mjs";
 
 async function commentOnIssuesAndPrsAboutRelease() {
-  let { latestRelease, pullRequests } = await prsMergedSinceLast({
-    owner,
-    repo,
+  let pullRequests = await prsMergedSinceLast({
+    owner: OWNER,
+    repo: REPO,
+    lastRelease: LATEST_RELEASE,
   });
-
   let suffix = pullRequests.length === 1 ? "" : "s";
   console.log(
     `Found ${pullRequests.length} PR${suffix} merged since last release`
@@ -25,10 +21,10 @@ async function commentOnIssuesAndPrsAboutRelease() {
   for (let pr of pullRequests) {
     console.log(`commenting on pr #${pr.number}`);
     await commentOnPullRequest({
-      owner,
-      repo,
+      owner: OWNER,
+      repo: REPO,
       pr: pr.number,
-      version: latestRelease,
+      version: LATEST_RELEASE,
     });
 
     let issuesClosed = await getIssuesClosedByPullRequests(pr.html_url);
@@ -37,9 +33,9 @@ async function commentOnIssuesAndPrsAboutRelease() {
       console.log(`commenting on issue #${issue.number}`);
       await commentOnIssue({
         issue: issue.number,
-        owner,
-        repo,
-        version: latestRelease,
+        owner: OWNER,
+        repo: REPO,
+        version: LATEST_RELEASE,
       });
     }
   }
