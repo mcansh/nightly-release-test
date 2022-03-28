@@ -1,0 +1,31 @@
+name: Comment on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  comment:
+    name: Comment on Release
+    if: github.repository == 'mcansh/nightly-release-test'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: "npm"
+          registry-url: "https://npm.pkg.github.com"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Comment on issues
+        run: node ./scripts/comment-on-issues.mjs
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REF: ${{ github.ref }}
