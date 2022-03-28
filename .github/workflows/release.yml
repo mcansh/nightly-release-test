@@ -52,9 +52,9 @@ jobs:
         run: |
           count=$(git rev-list $GITHUB_SHA..HEAD --count)
           if [ "$count" --tags "0" ]; then
-            echo ::set-output name=RELEASE::"true"
+            echo "::set-output name=RELEASE::true"
           else
-            echo ::set-output name=release::"false"
+            echo "::set-output name=release::false"
           fi
 
       - name: Setup node
@@ -80,7 +80,7 @@ jobs:
           SHA=$(git rev-parse HEAD)
           SHORT_SHA=${SHA::7}
           NEXT_VERSION=0.0.0-nightly-${SHORT_SHA}
-          echo ::set-output name=NEXT_VERSION::${NEXT_VERSION}
+          echo "::set-output name=NEXT_VERSION::${NEXT_VERSION}"
 
           git config user.email "hello@remix.run"
           git config user.name "Remix Run Bot"
