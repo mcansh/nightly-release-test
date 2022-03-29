@@ -47,7 +47,19 @@ jobs:
           ref: dev
           token: ${{ secrets.NIGHTLY_PAT }}
 
+      - name: Check for commits
+        id: nightly
+        run: |
+          count=$(git rev-list $GITHUB_SHA..HEAD --count)
+          echo "commit count $count"
+          if [ "$count" -gt "0" ]; then
+            echo "::set-output name=RELEASE::true"
+          else
+            echo "::set-output name=release::false"
+          fi
+
       - name: Setup node
+        if: steps.nightly.ouputs.RELEASE == true
         uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -55,30 +67,24 @@ jobs:
           registry-url: "https://npm.pkg.github.com"
 
       - name: Install dependencies
+        if: steps.nightly.ouputs.RELEASE == true
         run: npm install
 
-      - name: Set up git
-        run: |
-          git config user.email "hello@remix.run"
-          git config user.name "Remix Run Bot"
-
-      - name: Make a change
-        run: |
-          NOW=$(date +'%Y-%m-%d')
-          echo "console.log(\"greetings ${NOW}; nightly release\");" > ./src/index.ts
-          git add .
-          git commit -m "chore: updated ${NOW}"
-
       - name: Build
+        if: steps.nightly.ouputs.RELEASE == true
         run: npm run build
 
       - name: Update Version
+        if: steps.nightly.ouputs.RELEASE == true
         id: version
         run: |
           SHA=$(git rev-parse HEAD)
           SHORT_SHA=${SHA::7}
           NEXT_VERSION=0.0.0-nightly-${SHORT_SHA}
-          echo ::set-output name=NEXT_VERSION::${NEXT_VERSION}
+          echo "::set-output name=NEXT_VERSION::${NEXT_VERSION}"
+
+          git config user.email "hello@remix.run"
+          git config user.name "Remix Run Bot"
 
           git checkout -b nightly/${NEXT_VERSION}
           npm version ${NEXT_VERSION}
@@ -86,11 +92,13 @@ jobs:
           git push origin --tags
 
       - name: Publish
+        if: steps.nightly.ouputs.RELEASE == true
         run: npm publish --tag nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub release
+        if: steps.nightly.ouputs.RELEASE == true
         uses: actions/create-release@v1
         with:
           draft: false
