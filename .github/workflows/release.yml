@@ -10,7 +10,7 @@ on:
 jobs:
   stable:
     name: Stable Release
-    if: github.repository == 'mcansh/nightly-release-test' && github.event.action == 'published'
+    if: github.repository == 'mcansh/nightly-release-test' && github.event.action == 'published' && github.event_name != 'schedule'
     runs-on: ubuntu-latest
 
     steps:
