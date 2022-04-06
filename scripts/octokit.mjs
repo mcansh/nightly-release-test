@@ -1,7 +1,7 @@
 import { Octokit as RestOctokit } from "@octokit/rest";
 import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { graphql } from "@octokit/graphql";
-import invariant from "tiny-invariant";
+
 import { GITHUB_TOKEN, GITHUB_REPOSITORY } from "./constants.mjs";
 
 const graphqlWithAuth = graphql.defaults({
@@ -28,17 +28,16 @@ export async function prsMergedSinceLast({
     return new Date(b.published_at) - new Date(a.published_at);
   });
 
-  sorted[0].prerelease;
-
   let lastReleaseIndex = sorted.findIndex((release) => {
     return release.tag_name === lastReleaseVersion;
   });
 
   let lastRelease = sorted[lastReleaseIndex];
-  invariant(
-    lastRelease,
-    `Could not find last release ${lastRelease} in ${GITHUB_REPOSITORY}`
-  );
+  if (!lastRelease) {
+    throw new Error(
+      `Could not find last release ${lastRelease} in ${GITHUB_REPOSITORY}`
+    );
+  }
 
   // if the lastRelease was a stable release, then we want to find the previous stable release
   let previousReleaseIndex;
@@ -55,15 +54,14 @@ export async function prsMergedSinceLast({
   }
 
   let previousRelease = sorted.at(previousReleaseIndex);
-  invariant(
-    previousRelease,
-    `Could not find previous release in ${GITHUB_REPOSITORY}`
-  );
+  if (!previousRelease) {
+    throw new Error(`Could not find previous release in ${GITHUB_REPOSITORY}`);
+  }
 
   let startDate = new Date(previousRelease.created_at);
   let endDate = new Date(lastRelease.created_at);
 
-  const prs = await octokit.paginate(octokit.pulls.list, {
+  let prs = await octokit.paginate(octokit.pulls.list, {
     owner,
     repo,
     state: "closed",
