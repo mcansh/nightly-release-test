@@ -95,19 +95,33 @@ export async function commentOnIssue({ owner, repo, issue, version }) {
 }
 
 export async function getIssuesClosedByPullRequests(prHtmlUrl) {
-  let res = await graphqlWithAuth(gql`
-    {
-      resource(url: "${prHtmlUrl}") {
-        ... on PullRequest {
-          closingIssuesReferences(first: 100) {
-            nodes {
-              number
+  let res = await graphqlWithAuth(
+    gql`
+      query GET_ISSUES_CLOSED($prHtmlUrl: URI!) {
+        resource(url: $prHtmlUrl) {
+          ... on PullRequest {
+            files(first: 100) {
+              edges {
+                node {
+                  path
+                }
+              }
+            }
+            closingIssuesReferences(first: 100) {
+              nodes {
+                number
+              }
             }
           }
         }
       }
-    }
-  `);
+    `,
+    { prHtmlUrl }
+  );
 
-  return res?.resource?.closingIssuesReferences?.nodes;
+  let validPullRequests = res?.resource?.files.edges?.filter((edge) => {
+    return edge.node.path.startsWith("src/");
+  });
+
+  return validPullRequests?.resource?.closingIssuesReferences?.nodes ?? [];
 }
