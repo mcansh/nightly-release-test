@@ -69,10 +69,30 @@ export async function prsMergedSinceLast({
     direction: "desc",
   });
 
-  return prs.filter((pullRequest) => {
+  let mergedPullRequestsSinceLastTag = prs.filter((pullRequest) => {
     if (!pullRequest.merged_at) return false;
     let mergedDate = new Date(pullRequest.merged_at);
     return mergedDate > startDate && mergedDate < endDate;
+  });
+
+  let prsWithFiles = await Promise.all(
+    mergedPullRequestsSinceLastTag.map(async (pr) => {
+      let files = await octokit.paginate(octokit.pulls.listFiles, {
+        owner,
+        repo,
+        per_page: 100,
+        pull_number: pr.number,
+      });
+
+      return {
+        ...pr,
+        files,
+      };
+    })
+  );
+
+  return prsWithFiles.filter((pr) => {
+    return pr.files.some((file) => file.filename.startsWith("src/"));
   });
 }
 
@@ -100,13 +120,6 @@ export async function getIssuesClosedByPullRequests(prHtmlUrl) {
       query GET_ISSUES_CLOSED($prHtmlUrl: URI!) {
         resource(url: $prHtmlUrl) {
           ... on PullRequest {
-            files(first: 100) {
-              edges {
-                node {
-                  path
-                }
-              }
-            }
             closingIssuesReferences(first: 100) {
               nodes {
                 number
@@ -119,9 +132,5 @@ export async function getIssuesClosedByPullRequests(prHtmlUrl) {
     { prHtmlUrl }
   );
 
-  let validPullRequests = res?.resource?.files.edges?.filter((edge) => {
-    return edge.node.path.startsWith("src/");
-  });
-
-  return validPullRequests?.resource?.closingIssuesReferences?.nodes ?? [];
+  return res?.resource?.closingIssuesReferences?.nodes ?? [];
 }
