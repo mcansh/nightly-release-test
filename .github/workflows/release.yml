@@ -50,10 +50,8 @@ jobs:
       - name: Check for commits
         id: nightly
         run: |
-          echo "Checking for commits..."
-          echo "Last commit: $(git log -1 --pretty=%B)"
-          echo "Last commit: $GITHUB_SHA"
-          count=$(git rev-list $GITHUB_SHA..HEAD --count)
+          prev=$(git describe --tags $(git rev-list --tags --max-count=1))
+          count=$(git rev-list $prev..HEAD --count)
           echo "commit count $count"
           if [ "$count" -gt "0" ]; then
             echo "::set-output name=RELEASE::true"
