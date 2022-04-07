@@ -10,9 +10,12 @@ on:
 jobs:
   stable:
     name: Stable Release
-    if: github.repository == 'mcansh/nightly-release-test' && github.event.action == 'published' && github.event_name != 'schedule'
+    if: |
+      github.repository == 'mcansh/nightly-release-test' &&
+      github.event.action == 'published' &&
+      github.event_name != 'schedule' &&
+      !github.event.release.prerelease
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
