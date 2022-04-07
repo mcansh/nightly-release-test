@@ -2,7 +2,11 @@ import { Octokit as RestOctokit } from "@octokit/rest";
 import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { graphql } from "@octokit/graphql";
 
-import { GITHUB_TOKEN, GITHUB_REPOSITORY } from "./constants.mjs";
+import {
+  GITHUB_TOKEN,
+  GITHUB_REPOSITORY,
+  PR_FILES_STARTS_WITH,
+} from "./constants.mjs";
 
 const graphqlWithAuth = graphql.defaults({
   headers: { authorization: `token ${GITHUB_TOKEN}` },
@@ -92,7 +96,9 @@ export async function prsMergedSinceLast({
   );
 
   return prsWithFiles.filter((pr) => {
-    return pr.files.some((file) => file.filename.startsWith("src/"));
+    return pr.files.some((file) => {
+      return checkIfStringStartsWith(file.filename, PR_FILES_STARTS_WITH);
+    });
   });
 }
 
@@ -117,7 +123,7 @@ export async function commentOnIssue({ owner, repo, issue, version }) {
 export async function getIssuesClosedByPullRequests(prHtmlUrl) {
   let res = await graphqlWithAuth(
     gql`
-      query GET_ISSUES_CLOSED($prHtmlUrl: URI!) {
+      query GET_ISSUES_CLOSED_BY_PR($prHtmlUrl: URI!) {
         resource(url: $prHtmlUrl) {
           ... on PullRequest {
             closingIssuesReferences(first: 100) {
@@ -133,4 +139,8 @@ export async function getIssuesClosedByPullRequests(prHtmlUrl) {
   );
 
   return res?.resource?.closingIssuesReferences?.nodes ?? [];
+}
+
+function checkIfStringStartsWith(str, substrs) {
+  return substrs.some((substr) => str.startsWith(substr));
 }
