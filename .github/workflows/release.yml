@@ -50,8 +50,8 @@ jobs:
       - name: Check for commits
         id: nightly
         run: |
-          prev=$(git describe --tags $(git rev-list --tags --max-count=1))
-          count=$(git rev-list $prev..HEAD --count)
+          prev_release_sha=$(git rev-list --tags --max-count=1)
+          count=$(git rev-list $prev_release_sha..HEAD --count)
           echo "commit count $count"
           if [ "$count" -gt "0" ]; then
             echo "::set-output name=RELEASE::true"
