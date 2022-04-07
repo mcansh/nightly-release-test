@@ -98,6 +98,9 @@ jobs:
           git config user.name "Remix Run Bot"
 
           git checkout -b nightly/${NEXT_VERSION}
+          git add .
+          git commit -m "Nightly Release ${NEXT_VERSION}"
+
           npm version ${NEXT_VERSION}
 
           git push origin --tags
