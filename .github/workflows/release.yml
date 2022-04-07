@@ -51,7 +51,8 @@ jobs:
         id: nightly
         run: |
           prev_release_sha=$(git rev-list --tags --max-count=1)
-          count=$(git rev-list $prev_release_sha..HEAD --count)
+          echo "prev_release_sha: $prev_release_sha"
+          count=$(git rev-list $prev_release_sha..$GITHUB_SHA --count)
           echo "commit count $count"
           if [ "$count" -gt "0" ]; then
             echo "::set-output name=RELEASE::true"
