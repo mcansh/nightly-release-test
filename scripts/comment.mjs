@@ -1,4 +1,3 @@
-import invariant from "tiny-invariant";
 import {
   commentOnIssue,
   commentOnPullRequest,
@@ -19,6 +18,7 @@ async function commentOnIssuesAndPrsAboutRelease() {
   );
 
   let promises = [];
+  let issuesCommentedOn = new Set();
 
   for (let pr of pullRequests) {
     console.log(`commenting on pr #${pr.number}`);
@@ -35,6 +35,11 @@ async function commentOnIssuesAndPrsAboutRelease() {
     let issuesClosed = await getIssuesClosedByPullRequests(pr.html_url);
 
     for (let issue of issuesClosed) {
+      if (issuesCommentedOn.has(issue.number)) {
+        // already commented on this issue
+        continue;
+      }
+      issuesCommentedOn.add(issue.number);
       console.log(`commenting on issue #${issue.number}`);
       promises.push(
         commentOnIssue({

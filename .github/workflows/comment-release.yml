@@ -24,7 +24,7 @@ jobs:
         run: npm install
 
       - name: Comment on issues
-        run: node ./scripts/comment-on-issues.mjs
+        run: node ./scripts/comment.mjs
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
