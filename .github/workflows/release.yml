@@ -3,7 +3,7 @@ name: release
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 21 * * *" # every day at 7PM EST
+    - cron: "0 22 * * *" # every day at 10PM UTC
   release:
     types: [published]
 
