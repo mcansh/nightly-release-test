@@ -46,6 +46,7 @@ jobs:
         with:
           ref: dev
           token: ${{ secrets.NIGHTLY_PAT }}
+          fetch-depth: 0
 
       - name: Get Previous tag
         id: previous_tag
