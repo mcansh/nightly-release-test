@@ -61,8 +61,12 @@ jobs:
           if [ "$count" -gt "0" ]; then
             echo "::set-output name=RELEASE::true"
           else
-            echo "::set-output name=release::false"
+            echo "::set-output name=RELEASE::false"
           fi
+
+      - name: Check
+        run: |
+          echo "release? ${{ steps.nightly.outputs.RELEASE }}"
 
       - name: Setup node
         if: steps.nightly.outputs.RELEASE == true
