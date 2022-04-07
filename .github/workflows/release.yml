@@ -50,6 +50,8 @@ jobs:
       - name: Check for commits
         id: nightly
         run: |
+          branch=$(git rev-parse --abbrev-ref HEAD)
+          echo "branch: $branch"
           count=$(git rev-list $GITHUB_SHA..HEAD --count)
           echo "commit count $count"
           if [ "$count" -gt "0" ]; then
