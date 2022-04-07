@@ -66,6 +66,7 @@ jobs:
 
       - name: Check
         run: |
+          echo "steps.nightly.outputs.RELEASE == "true""
           echo "release? ${{ steps.nightly.outputs.RELEASE }}"
 
       - name: Setup node
