@@ -53,23 +53,24 @@ export async function prsMergedSinceLast({
   }
 
   // if the lastRelease was a stable release, then we want to find the previous stable release
-  let previousReleaseIndex;
+  let previousRelease;
   if (lastRelease.prerelease === false) {
-    let minusLatestRelease = [
-      ...sorted.slice(0, lastReleaseIndex),
-      ...sorted.slice(lastReleaseIndex + 1),
-    ];
-    previousReleaseIndex = minusLatestRelease.findIndex((release) => {
+    let stableReleases = sorted.filter((release) => {
       return release.prerelease === false;
     });
+    previousRelease = stableReleases.at(1);
   } else {
-    previousReleaseIndex = lastReleaseIndex + 1;
+    previousRelease = sorted.at(lastReleaseIndex + 1);
   }
 
-  let previousRelease = sorted.at(previousReleaseIndex);
   if (!previousRelease) {
     throw new Error(`Could not find previous release in ${GITHUB_REPOSITORY}`);
   }
+
+  console.log({
+    lastRelease: lastRelease.tag_name,
+    previousRelease: previousRelease.tag_name,
+  });
 
   let startDate = new Date(previousRelease.created_at);
   let endDate = new Date(lastRelease.created_at);
