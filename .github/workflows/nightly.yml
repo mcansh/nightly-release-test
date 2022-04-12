@@ -45,9 +45,9 @@ jobs:
           git checkout -b nightly/${NEXT_VERSION}
 
           if [ -z "$(git status --porcelain)" ]; then
-            echo "💿"
+            echo "✨"
           else
-            echo "💾"
+            echo "💿 committing changes"
             git add .
             git commit -m "something"
           fi
