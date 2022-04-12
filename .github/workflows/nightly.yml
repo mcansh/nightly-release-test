@@ -50,7 +50,6 @@ jobs:
             echo "💾"
             git add .
             git commit -m "something"
-            git push origin nightly/${NEXT_VERSION}
           fi
 
           npm version ${NEXT_VERSION}
@@ -82,7 +81,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Comment
+      - name: 🛴 Kick of comment action
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EVENT: comment
@@ -93,5 +92,5 @@ jobs:
           curl -H "Accept: application/vnd.github.everest-preview+json" \
             -H "Authorization: token ${GITHUB_TOKEN}" \
             --request POST \
-            --data '{"event_type": \"${EVENT}\", "client_payload": {"ref": \"${VERSION}\"}}' \
+            --data '{ "event_type": "${EVENT}", "client_payload": { "ref": "${VERSION}" } }' \
             https://api.github.com/repos/${ORG}/${REPO}/dispatches

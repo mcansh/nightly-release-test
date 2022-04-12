@@ -52,5 +52,5 @@ jobs:
           curl -H "Accept: application/vnd.github.everest-preview+json" \
             -H "Authorization: token ${GITHUB_TOKEN}" \
             --request POST \
-            --data '{"event_type": \"${EVENT}\", "client_payload": {"ref": \"${VERSION}\"}}' \
+            --data '{ "event_type": "${EVENT}", "client_payload": { "ref": "${VERSION}" } }' \
             https://api.github.com/repos/${ORG}/${REPO}/dispatches
