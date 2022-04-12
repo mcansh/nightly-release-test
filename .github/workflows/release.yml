@@ -9,7 +9,7 @@ jobs:
     name: Manual Release
     if: |
       github.repository == 'mcansh/nightly-release-test' &&
-      !contains(github.ref, "nightly")
+      !contains(github.ref, 'nightly')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
