@@ -2,7 +2,7 @@ name: Comment on Release
 
 on:
   repository_dispatch:
-    types: [on-demand-test]
+    types: [comment]
 
 jobs:
   comment:
@@ -28,4 +28,4 @@ jobs:
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
-          GITHUB_REF: ${{ github.ref }}
+          GITHUB_REF: ${{ github.event.client_payload.ref }}

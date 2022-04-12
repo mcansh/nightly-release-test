@@ -1,17 +1,22 @@
-name: Manual Release
+name: Nightly Release
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
+  schedule:
+    - cron: "15 22 * * *" # every day at 10:15 PM UTC
 
 jobs:
-  manual:
-    name: Manual Release
+  nightly:
+    name: Nightly Release
     if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          ref: dev
+          token: ${{ secrets.NIGHTLY_PAT }}
+          fetch-depth: 0
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -26,13 +31,39 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Update Version
+        id: version
+        run: |
+          SHA=$(git rev-parse HEAD)
+          SHORT_SHA=${SHA::7}
+          NEXT_VERSION=0.0.0-nightly-${SHORT_SHA}
+          echo "::set-output name=NEXT_VERSION::${NEXT_VERSION}"
+
+          git config user.email "hello@remix.run"
+          git config user.name "Remix Run Bot"
+
+          git checkout -b nightly/${NEXT_VERSION}
+          npm version ${NEXT_VERSION}
+
+          git push origin --tags
+
       - name: Publish
-        run: npm publish
+        run: npm publish --tag nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        with:
+          draft: false
+          prerelease: true
+          release_name: v${{ steps.version.outputs.NEXT_VERSION }}
+          tag_name: v${{ steps.version.outputs.NEXT_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIGHTLY_PAT }}
+
   comment:
-    needs: [manual]
+    needs: [nightly]
     name: Comment on Issues and PRs
     if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
@@ -47,7 +78,7 @@ jobs:
           EVENT: comment
           ORG: mcansh
           REPO: nightly-release-test
-          VERSION: ${{ github.ref }}
+          VERSION: refs/tags/v${{ steps.version.outputs.NEXT_VERSION }}
         run: |
           curl -H "Accept: application/vnd.github.everest-preview+json" \
             -H "Authorization: token ${GITHUB_TOKEN}" \
