@@ -10,6 +10,8 @@ jobs:
     name: Nightly Release
     if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
+    outputs:
+      NEXT_VERSION: ${{ steps.version.outputs.NEXT_VERSION }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -87,7 +89,7 @@ jobs:
           EVENT: comment
           ORG: mcansh
           REPO: nightly-release-test
-          VERSION: refs/tags/v${{ steps.version.outputs.NEXT_VERSION }}
+          VERSION: refs/tags/v${{ needs.nightly.outputs.NEXT_VERSION }}
         run: |
           curl -H "Accept: application/vnd.github.everest-preview+json" \
             -H "Authorization: token ${GITHUB_TOKEN}" \
