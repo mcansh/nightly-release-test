@@ -43,6 +43,16 @@ jobs:
           git config user.name "Remix Run Bot"
 
           git checkout -b nightly/${NEXT_VERSION}
+
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "💿"
+          else
+            echo "💾"
+            git add .
+            git commit -m "something"
+            git push origin nightly/${NEXT_VERSION}
+          fi
+
           npm version ${NEXT_VERSION}
 
           git push origin --tags
