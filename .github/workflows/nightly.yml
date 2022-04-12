@@ -69,6 +69,8 @@ jobs:
           prerelease: true
           release_name: v${{ steps.version.outputs.NEXT_VERSION }}
           tag_name: v${{ steps.version.outputs.NEXT_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   comment:
     needs: [nightly]
