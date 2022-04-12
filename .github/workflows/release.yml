@@ -1,20 +1,13 @@
-name: release
+name: Manual Release
 
 on:
-  workflow_dispatch:
-  schedule:
-    - cron: "15 22 * * *" # every day at 10:15 PM UTC
   release:
     types: [published]
 
 jobs:
-  stable:
-    name: Stable Release
-    if: |
-      github.repository == 'mcansh/nightly-release-test' && 
-      github.event.action == 'published' && 
-      github.event_name != 'schedule' && 
-      !github.event.release.prerelease
+  manual:
+    name: Manual Release
+    if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -38,60 +31,22 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  nightly:
-    name: Nightly Release
-    if: |
-      github.repository == 'mcansh/nightly-release-test' &&
-      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+  comment:
+    needs: [manual]
+    name: Comment on Issues and PRs
+    if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-        with:
-          ref: dev
-          token: ${{ secrets.NIGHTLY_PAT }}
-          fetch-depth: 0
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: "npm"
-          registry-url: "https://npm.pkg.github.com"
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build
-        run: npm run build
-
-      - name: Update Version
-        id: version
+      - name: Comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT: comment
+          ORG: mcansh
+          REPO: nightly-release-test
+          VERSION: ${{ github.ref }}
         run: |
-          SHA=$(git rev-parse HEAD)
-          SHORT_SHA=${SHA::7}
-          NEXT_VERSION=0.0.0-nightly-${SHORT_SHA}
-          echo "::set-output name=NEXT_VERSION::${NEXT_VERSION}"
-
-          git config user.email "hello@remix.run"
-          git config user.name "Remix Run Bot"
-
-          git checkout -b nightly/${NEXT_VERSION}
-          npm version ${NEXT_VERSION}
-
-          git push origin --tags
-
-      - name: Publish
-        run: npm publish --tag nightly
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create GitHub release
-        uses: actions/create-release@v1
-        with:
-          draft: false
-          prerelease: true
-          release_name: v${{ steps.version.outputs.NEXT_VERSION }}
-          tag_name: v${{ steps.version.outputs.NEXT_VERSION }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.NIGHTLY_PAT }}
+          curl -H "Accept: application/vnd.github.everest-preview+json" \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            --request POST \
+            --data '{ "event_type": "${EVENT}", "client_payload": { "ref": "${VERSION}" } }' \
+            https://api.github.com/repos/${ORG}/${REPO}/dispatches
