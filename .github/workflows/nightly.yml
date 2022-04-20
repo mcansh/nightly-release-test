@@ -84,11 +84,11 @@ jobs:
 
   comment:
     needs: [nightly]
-    name: Comment on Issues and PRs
+    name: 🛴 Kick of comment and deployment workflows
     if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
     steps:
-      - name: 🛴 Kick of comment action
+      - name: 🛴 Kick of comment and deployment workflows
         env:
           GITHUB_TOKEN: ${{ secrets.NIGHTLY_PAT }}
           EVENT: comment
