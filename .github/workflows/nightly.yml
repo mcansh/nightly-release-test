@@ -90,7 +90,7 @@ jobs:
     steps:
       - name: 🛴 Kick of comment action
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.NIGHTLY_PAT }}
           EVENT: comment
           ORG: mcansh
           REPO: nightly-release-test
