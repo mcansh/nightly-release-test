@@ -91,13 +91,12 @@ jobs:
       - name: 🛴 Kick of comment and deployment workflows
         env:
           GITHUB_TOKEN: ${{ secrets.NIGHTLY_PAT }}
-          EVENT: comment
-          ORG: mcansh
-          REPO: nightly-release-test
+          EVENT: release
+          REPO: mcansh/nightly-release-test
           VERSION: refs/tags/v${{ needs.nightly.outputs.NEXT_VERSION }}
         run: |
           curl -H "Accept: application/vnd.github.everest-preview+json" \
             -H "Authorization: token ${GITHUB_TOKEN}" \
             --request POST \
             --data '{ "event_type": "${EVENT}", "client_payload": { "ref": "${VERSION}" } }' \
-            https://api.github.com/repos/${ORG}/${REPO}/dispatches
+            https://api.github.com/repos/${REPO}/dispatches

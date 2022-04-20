@@ -2,7 +2,7 @@ name: Comment on Release
 
 on:
   repository_dispatch:
-    types: [comment]
+    types: [release]
 
 jobs:
   comment:
