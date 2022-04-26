@@ -136,7 +136,6 @@ export async function getIssuesClosedByPullRequests(
   nodes = [],
   after
 ) {
-  console.log(`Getting issues closed by ${prHtmlUrl}`);
   let res = await graphqlWithAuth(
     gql`
       query GET_ISSUES_CLOSED_BY_PR($prHtmlUrl: URI!, $after: String) {
@@ -160,12 +159,8 @@ export async function getIssuesClosedByPullRequests(
 
   let newNodes = res?.resource?.closingIssuesReferences?.nodes ?? [];
   nodes.push(...newNodes);
-  console.log(
-    `Found ${newNodes.length} for a total of ${nodes.length} issues closed by ${prHtmlUrl}`
-  );
 
   if (res?.resource?.closingIssuesReferences?.pageInfo?.hasNextPage) {
-    console.log(`Has next page`);
     return getIssuesClosedByPullRequests(
       prHtmlUrl,
       nodes,
