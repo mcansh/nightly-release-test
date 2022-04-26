@@ -17,6 +17,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: dev
+          token: ${{ secrets.NIGHTLY_PAT }}
           fetch-depth: 0
 
       - name: Setup node
@@ -29,6 +30,18 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Set up git
+        run: |
+          git config user.email "hello@remix.run"
+          git config user.name "Remix Run Bot"
+
+      - name: Make a change
+        run: |
+          NOW=$(date +'%Y-%m-%d')
+          echo "console.log(\"greetings ${NOW}; nightly release\");" > ./src/index.ts
+          git add .
+          git commit -m "chore: updated ${NOW}"
+
       - name: Build
         run: npm run build
 
@@ -39,9 +52,6 @@ jobs:
           SHORT_SHA=${SHA::7}
           NEXT_VERSION=0.0.0-nightly-${SHORT_SHA}
           echo "::set-output name=NEXT_VERSION::${NEXT_VERSION}"
-
-          git config user.email "hello@remix.run"
-          git config user.name "Remix Run Bot"
 
           git checkout -b nightly/${NEXT_VERSION}
 
@@ -70,24 +80,23 @@ jobs:
           release_name: v${{ steps.version.outputs.NEXT_VERSION }}
           tag_name: v${{ steps.version.outputs.NEXT_VERSION }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.NIGHTLY_PAT }}
 
   comment:
     needs: [nightly]
-    name: Comment on Issues and PRs
+    name: 🛴 Kick of comment and deployment workflows
     if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
     steps:
-      - name: 🛴 Kick of comment action
+      - name: 🛴 Kick of comment and deployment workflows
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EVENT: comment
-          ORG: mcansh
-          REPO: nightly-release-test
+          GITHUB_TOKEN: ${{ secrets.NIGHTLY_PAT }}
+          EVENT: release
+          REPO: mcansh/nightly-release-test
           VERSION: refs/tags/v${{ needs.nightly.outputs.NEXT_VERSION }}
         run: |
           curl -H "Accept: application/vnd.github.everest-preview+json" \
             -H "Authorization: token ${GITHUB_TOKEN}" \
             --request POST \
             --data '{ "event_type": "${EVENT}", "client_payload": { "ref": "${VERSION}" } }' \
-            https://api.github.com/repos/${ORG}/${REPO}/dispatches
+            https://api.github.com/repos/${REPO}/dispatches
