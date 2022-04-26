@@ -6,6 +6,7 @@ import {
   GITHUB_TOKEN,
   GITHUB_REPOSITORY,
   PR_FILES_STARTS_WITH,
+  PR_KEYWORDS,
 } from "./constants.mjs";
 
 const graphqlWithAuth = graphql.defaults({
@@ -131,11 +132,7 @@ export async function commentOnIssue({ owner, repo, issue, version }) {
   });
 }
 
-export async function getIssuesClosedByPullRequests(
-  prHtmlUrl,
-  nodes = [],
-  after
-) {
+async function getIssuesLinkedToPullRequest(prHtmlUrl, nodes = [], after) {
   let res = await graphqlWithAuth(
     gql`
       query GET_ISSUES_CLOSED_BY_PR($prHtmlUrl: URI!, $after: String) {
@@ -161,7 +158,7 @@ export async function getIssuesClosedByPullRequests(
   nodes.push(...newNodes);
 
   if (res?.resource?.closingIssuesReferences?.pageInfo?.hasNextPage) {
-    return getIssuesClosedByPullRequests(
+    return getIssuesLinkedToPullRequest(
       prHtmlUrl,
       nodes,
       res?.resource?.closingIssuesReferences?.pageInfo?.endCursor
@@ -169,6 +166,25 @@ export async function getIssuesClosedByPullRequests(
   }
 
   return nodes;
+}
+
+export async function getIssuesClosedByPullRequests(prHtmlUrl, prDescription) {
+  console.log({ prHtmlUrl, prDescription });
+  let linked = await getIssuesLinkedToPullRequest(prHtmlUrl);
+  if (!prDescription) return linked;
+  let regex = /([\w]*.?\s+).?#([0-9]+)/gi;
+  let matches = prDescription.match(regex);
+  if (!matches) return linked;
+
+  let issues = matches.map((match) => {
+    console.log(match);
+    let [keyword, issueNumber] = match.split(" #");
+    console.log({ keyword, issueNumber });
+    if (!PR_KEYWORDS.has(keyword.toLowerCase())) return null;
+    return { number: parseInt(issueNumber, 10) };
+  });
+
+  return [...linked, ...issues.filter((issue) => issue !== null)];
 }
 
 function checkIfStringStartsWith(string, substrings) {
