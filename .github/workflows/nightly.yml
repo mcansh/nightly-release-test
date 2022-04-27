@@ -84,19 +84,12 @@ jobs:
 
   comment:
     needs: [nightly]
-    name: 🛴 Kick of comment and deployment workflows
+    name: 🛴 Kick off comment and deployment test workflows
     if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
     steps:
-      - name: 🛴 Kick of comment and deployment workflows
-        env:
-          GITHUB_TOKEN: ${{ secrets.NIGHTLY_PAT }}
-          EVENT: release
-          REPO: mcansh/nightly-release-test
-          VERSION: refs/tags/v${{ needs.nightly.outputs.NEXT_VERSION }}
-        run: |
-          curl -H "Accept: application/vnd.github.everest-preview+json" \
-            -H "Authorization: token ${GITHUB_TOKEN}" \
-            --request POST \
-            --data '{ "event_type": "${EVENT}", "client_payload": { "ref": "${VERSION}" } }' \
-            https://api.github.com/repos/${REPO}/dispatches
+      - uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.NIGHTLY_PAT }}
+          event-type: release
+          client-payload: '{ "ref": "refs/tags/v${{ needs.nightly.outputs.NEXT_VERSION }}" }'
