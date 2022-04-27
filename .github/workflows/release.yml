@@ -1,4 +1,4 @@
-name: Manual Release
+name: 🕊 Release
 
 on:
   release:
@@ -6,35 +6,42 @@ on:
 
 jobs:
   manual:
-    name: Manual Release
+    name: 📝 Manual Release
+    # we need to check for `nightly` refs and skip them as we don't want to
+    # double publish a version as it would fail. unfortunately even using curl
+    # and a `repository_dispatch` trigger, actions still aren't ran if a version
+    # is published using the default secrets.GITHUB_TOKEN.
     if: |
       github.repository == 'mcansh/nightly-release-test' &&
       !contains(github.ref, 'nightly')
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
+      - name: 🛑 Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.1
+
+      - name: ⬇️ Checkout repo
         uses: actions/checkout@v3
 
-      - name: Setup node
+      - name: ⎔ Setup node
         uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: "npm"
           registry-url: "https://npm.pkg.github.com"
 
-      - name: Install dependencies
-        run: npm install
+      - name: 📥 Install deps
+        uses: bahmutov/npm-install@v1
 
-      - name: Build
-        run: npm run build
+      - name: 🏗 Build
+        run: yarn build
 
-      - name: Publish
-        run: npm publish
+      - name: 🚀 Publish
+        run: npm run publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   comment:
-    needs: [nightly]
+    needs: [manual]
     name: 🛴 Kick off comment and deployment test workflows
     if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
