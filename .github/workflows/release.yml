@@ -34,7 +34,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   comment:
-    needs: [nightly]
+    needs: [manual]
     name: 🛴 Kick off comment and deployment test workflows
     if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
