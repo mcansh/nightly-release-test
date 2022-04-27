@@ -34,21 +34,13 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   comment:
-    needs: [manual]
-    name: Comment on Issues and PRs
+    needs: [nightly]
+    name: 🛴 Kick off comment and deployment test workflows
     if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
     steps:
-      - name: Comment
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EVENT: comment
-          ORG: mcansh
-          REPO: nightly-release-test
-          VERSION: ${{ github.ref }}
-        run: |
-          curl -H "Accept: application/vnd.github.everest-preview+json" \
-            -H "Authorization: token ${GITHUB_TOKEN}" \
-            --request POST \
-            --data '{ "event_type": "${EVENT}", "client_payload": { "ref": "${VERSION}" } }' \
-            https://api.github.com/repos/${ORG}/${REPO}/dispatches
+      - uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.NIGHTLY_PAT }}
+          event-type: release
+          client-payload: '{ "ref": "${{ github.ref }}" }'
