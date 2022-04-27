@@ -75,7 +75,7 @@ jobs:
         run: git push origin --tags
 
       - name: 🚀 Publish
-        run: npm run publish
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
