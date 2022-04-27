@@ -96,7 +96,7 @@ export async function prsMergedSinceLast({
   );
 
   return {
-    previousRelease,
+    previousRelease: previousRelease.tag_name,
     merged: prsWithFiles.filter((pr) => {
       return pr.files.some((file) => {
         return checkIfStringStartsWith(file.filename, PR_FILES_STARTS_WITH);
