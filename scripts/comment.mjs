@@ -14,7 +14,7 @@ async function commentOnIssuesAndPrsAboutRelease() {
   });
   let suffix = pullRequests.length === 1 ? "" : "s";
   console.log(
-    `Found ${pullRequests.length} PR${suffix} merged since last release`
+    `Found ${pullRequests.length} PR${suffix} merged since last release (${LATEST_RELEASE})`
   );
 
   let promises = [];
