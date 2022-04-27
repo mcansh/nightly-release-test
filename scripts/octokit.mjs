@@ -22,11 +22,6 @@ export async function prsMergedSinceLast({
   repo,
   lastRelease: lastReleaseVersion,
 }) {
-  // we don't want to comment about experimental releases
-  if (lastReleaseVersion.includes("experimental")) {
-    return [];
-  }
-
   let releases = await octokit.paginate(octokit.rest.repos.listReleases, {
     owner,
     repo,
@@ -67,11 +62,6 @@ export async function prsMergedSinceLast({
     throw new Error(`Could not find previous release in ${GITHUB_REPOSITORY}`);
   }
 
-  console.log({
-    lastRelease: lastRelease.tag_name,
-    previousRelease: previousRelease.tag_name,
-  });
-
   let startDate = new Date(previousRelease.created_at);
   let endDate = new Date(lastRelease.created_at);
 
@@ -105,11 +95,14 @@ export async function prsMergedSinceLast({
     })
   );
 
-  return prsWithFiles.filter((pr) => {
-    return pr.files.some((file) => {
-      return checkIfStringStartsWith(file.filename, PR_FILES_STARTS_WITH);
-    });
-  });
+  return {
+    previousRelease,
+    merged: prsWithFiles.filter((pr) => {
+      return pr.files.some((file) => {
+        return checkIfStringStartsWith(file.filename, PR_FILES_STARTS_WITH);
+      });
+    }),
+  };
 }
 
 export async function commentOnPullRequest({ owner, repo, pr, version }) {
