@@ -1,6 +1,6 @@
 {
   "name": "@mcansh/nightly-release-test",
-  "version": "0.12.0",
+  "version": "0.0.0-nightly-fd74dd3-20220428",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
