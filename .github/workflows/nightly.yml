@@ -46,6 +46,10 @@ jobs:
           git config --local user.email "hello@remix.run"
           git config --local user.name "Remix Run Bot"
 
+          echo "console.log(\"greetings ${DATE}; nightly release\");" > ./src/index.ts
+          git add .
+          git commit -m "chore: updated ${DATE}"
+
           SHA=$(git rev-parse HEAD)
           SHORT_SHA=${SHA::7}
           DATE=$(date '+%Y%m%d')
@@ -53,10 +57,6 @@ jobs:
           echo ::set-output name=NEXT_VERSION::${NEXT_VERSION}
 
           git checkout -b nightly/${NEXT_VERSION}
-
-          echo "console.log(\"greetings ${DATE}; nightly release\");" > ./src/index.ts
-          git add .
-          git commit -m "chore: updated ${DATE}"
 
           if [ -z "$(git status --porcelain)" ]; then
             echo "✨"
