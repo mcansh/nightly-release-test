@@ -22,13 +22,13 @@ export async function prsMergedSinceLast({
   repo,
   lastRelease: lastReleaseVersion,
 }) {
-  let releases = await octokit.paginate(octokit.rest.repos.listReleases, {
+  let tags = await octokit.paginate(octokit.rest.repos.listTags, {
     owner,
     repo,
     per_page: 100,
   });
 
-  let sorted = releases
+  let sorted = tags
     .sort((a, b) => {
       return new Date(b.published_at) - new Date(a.published_at);
     })
@@ -36,11 +36,11 @@ export async function prsMergedSinceLast({
       return release.tag_name.includes("experimental") === false;
     });
 
-  let lastReleaseIndex = sorted.findIndex((release) => {
+  let lastTagIndex = sorted.findIndex((release) => {
     return release.tag_name === lastReleaseVersion;
   });
 
-  let lastRelease = sorted[lastReleaseIndex];
+  let lastRelease = sorted[lastTagIndex];
   if (!lastRelease) {
     throw new Error(
       `Could not find last release ${lastRelease} in ${GITHUB_REPOSITORY}`
@@ -55,7 +55,7 @@ export async function prsMergedSinceLast({
     });
     previousRelease = stableReleases.at(1);
   } else {
-    previousRelease = sorted.at(lastReleaseIndex + 1);
+    previousRelease = sorted.at(lastTagIndex + 1);
   }
 
   if (!previousRelease) {
