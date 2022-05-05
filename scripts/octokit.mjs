@@ -17,10 +17,10 @@ const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
 const gql = String.raw;
 
-export async function prsMergedSinceLast({
+export async function prsMergedSinceLastTag({
   owner,
   repo,
-  lastRelease: lastReleaseVersion,
+  lastTag: lastTagVersion,
 }) {
   let tags = await octokit.paginate(octokit.rest.repos.listTags, {
     owner,
@@ -32,38 +32,38 @@ export async function prsMergedSinceLast({
     .sort((a, b) => {
       return new Date(b.published_at) - new Date(a.published_at);
     })
-    .filter((release) => {
-      return release.tag_name.includes("experimental") === false;
+    .filter((tag) => {
+      return tag.tag_name.includes("experimental") === false;
     });
 
-  let lastTagIndex = sorted.findIndex((release) => {
-    return release.tag_name === lastReleaseVersion;
+  let lastTagIndex = sorted.findIndex((tag) => {
+    return tag.tag_name === lastTagVersion;
   });
 
-  let lastRelease = sorted[lastTagIndex];
-  if (!lastRelease) {
+  let lastTag = sorted.at(lastTagIndex);
+  if (!lastTag) {
     throw new Error(
-      `Could not find last release ${lastRelease} in ${GITHUB_REPOSITORY}`
+      `Could not find last tag ${lastTag} in ${GITHUB_REPOSITORY}`
     );
   }
 
-  // if the lastRelease was a stable release, then we want to find the previous stable release
-  let previousRelease;
-  if (lastRelease.prerelease === false) {
-    let stableReleases = sorted.filter((release) => {
-      return release.prerelease === false;
+  // if the lastTag was a stable tag, then we want to find the previous stable tag
+  let previousTag;
+  if (!lastTag.tag_name.includes("nightly")) {
+    let stableTags = sorted.filter((tag) => {
+      return !tag.tag_name.includes("nightly");
     });
-    previousRelease = stableReleases.at(1);
+    previousTag = stableTags.at(1);
   } else {
-    previousRelease = sorted.at(lastTagIndex + 1);
+    previousTag = sorted.at(lastTagIndex + 1);
   }
 
-  if (!previousRelease) {
-    throw new Error(`Could not find previous release in ${GITHUB_REPOSITORY}`);
+  if (!previousTag) {
+    throw new Error(`Could not find previous tag in ${GITHUB_REPOSITORY}`);
   }
 
-  let startDate = new Date(previousRelease.created_at);
-  let endDate = new Date(lastRelease.created_at);
+  let startDate = new Date(previousTag.created_at);
+  let endDate = new Date(lastTag.created_at);
 
   let prs = await octokit.paginate(octokit.pulls.list, {
     owner,
@@ -96,7 +96,7 @@ export async function prsMergedSinceLast({
   );
 
   return {
-    previousRelease: previousRelease.tag_name,
+    previousTag: previousTag.tag_name,
     merged: prsWithFiles.filter((pr) => {
       return pr.files.some((file) => {
         return checkIfStringStartsWith(file.filename, PR_FILES_STARTS_WITH);

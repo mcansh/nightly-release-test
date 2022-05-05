@@ -2,7 +2,7 @@ import {
   commentOnIssue,
   commentOnPullRequest,
   getIssuesClosedByPullRequests,
-  prsMergedSinceLast,
+  prsMergedSinceLastTag,
 } from "./octokit.mjs";
 import { LATEST_RELEASE, OWNER, REPO } from "./constants.mjs";
 
@@ -11,15 +11,15 @@ async function commentOnIssuesAndPrsAboutRelease() {
     return;
   }
 
-  let { merged, previousRelease } = await prsMergedSinceLast({
+  let { merged, previousTag } = await prsMergedSinceLastTag({
     owner: OWNER,
     repo: REPO,
-    lastRelease: LATEST_RELEASE,
+    lastTag: LATEST_RELEASE,
   });
 
   let suffix = merged.length === 1 ? "" : "s";
   console.log(
-    `Found ${merged.length} PR${suffix} merged since last release (latest: ${LATEST_RELEASE}, previous: ${previousRelease})`
+    `Found ${merged.length} PR${suffix} merged since previous release (current: ${LATEST_RELEASE}, previous: ${previousTag})`
   );
 
   let promises = [];
