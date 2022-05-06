@@ -46,7 +46,7 @@ jobs:
           git config --local user.email "hello@remix.run"
           git config --local user.name "Remix Run Bot"
 
-          echo "console.log(\"greetings ${DATE}; nightly release\");" > ./src/index.ts
+          echo "console.log(\"greetings ${DATE}; nightly release\");" > ./packages/index.ts
           git add .
           git commit -m "chore: updated ${DATE}"
 
