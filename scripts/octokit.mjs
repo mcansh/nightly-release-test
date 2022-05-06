@@ -1,19 +1,43 @@
 import { Octokit as RestOctokit } from "@octokit/rest";
 import { paginateRest } from "@octokit/plugin-paginate-rest";
+import { throttling } from "@octokit/plugin-throttling";
 import { graphql } from "@octokit/graphql";
+import semver from "semver";
 
 import {
   GITHUB_TOKEN,
   GITHUB_REPOSITORY,
   PR_FILES_STARTS_WITH,
+  PRE_RELEASE_TAGS,
 } from "./constants.mjs";
 
 const graphqlWithAuth = graphql.defaults({
   headers: { authorization: `token ${GITHUB_TOKEN}` },
 });
 
-const Octokit = RestOctokit.plugin(paginateRest);
-const octokit = new Octokit({ auth: GITHUB_TOKEN });
+const Octokit = RestOctokit.plugin(paginateRest, throttling);
+const octokit = new Octokit({
+  auth: GITHUB_TOKEN,
+  throttle: {
+    onRateLimit: (retryAfter, options, octokit) => {
+      octokit.log.warn(
+        `Request quota exhausted for request ${options.method} ${options.url}`
+      );
+
+      if (options.request.retryCount === 0) {
+        // only retries once
+        octokit.log.info(`Retrying after ${retryAfter} seconds!`);
+        return true;
+      }
+    },
+    onSecondaryRateLimit: (retryAfter, options, octokit) => {
+      // does not retry, only logs a warning
+      octokit.log.warn(
+        `SecondaryRateLimit detected for request ${options.method} ${options.url}`
+      );
+    },
+  },
+});
 
 const gql = String.raw;
 
@@ -22,22 +46,21 @@ export async function prsMergedSinceLastTag({
   repo,
   lastTag: lastTagVersion,
 }) {
-  let tags = await octokit.paginate(octokit.rest.repos.listTags, {
-    owner,
-    repo,
-    per_page: 100,
-  });
+  let tags = await getAllTags(owner, repo);
 
+  /** @type {Array<{ name: string, date: string }>} */
   let sorted = tags
-    .sort((a, b) => {
-      return new Date(b.published_at) - new Date(a.published_at);
+    .map((tag) => {
+      if (!tag.node.target?.tagger?.date) return;
+      return { name: tag.node.name, date: tag.node.target.tagger.date };
     })
-    .filter((tag) => {
-      return tag.tag_name.includes("experimental") === false;
+    .filter(Boolean)
+    .sort((a, b) => {
+      return semver.rcompare(a.name, b.name) && a.date - b.date;
     });
 
   let lastTagIndex = sorted.findIndex((tag) => {
-    return tag.tag_name === lastTagVersion;
+    return tag.name === lastTagVersion;
   });
 
   let lastTag = sorted.at(lastTagIndex);
@@ -49,9 +72,9 @@ export async function prsMergedSinceLastTag({
 
   // if the lastTag was a stable tag, then we want to find the previous stable tag
   let previousTag;
-  if (!lastTag.tag_name.includes("nightly")) {
+  if (!lastTag.name.includes("nightly")) {
     let stableTags = sorted.filter((tag) => {
-      return !tag.tag_name.includes("nightly");
+      return !PRE_RELEASE_TAGS.some((type) => tag.name.includes(type));
     });
     previousTag = stableTags.at(1);
   } else {
@@ -62,8 +85,8 @@ export async function prsMergedSinceLastTag({
     throw new Error(`Could not find previous tag in ${GITHUB_REPOSITORY}`);
   }
 
-  let startDate = new Date(previousTag.created_at);
-  let endDate = new Date(lastTag.created_at);
+  let startDate = new Date(previousTag.date);
+  let endDate = new Date(lastTag.date);
 
   let prs = await octokit.paginate(octokit.pulls.list, {
     owner,
@@ -71,6 +94,7 @@ export async function prsMergedSinceLastTag({
     state: "closed",
     sort: "updated",
     direction: "desc",
+    per_page: 100,
   });
 
   let mergedPullRequestsSinceLastTag = prs.filter((pullRequest) => {
@@ -88,15 +112,12 @@ export async function prsMergedSinceLastTag({
         pull_number: pr.number,
       });
 
-      return {
-        ...pr,
-        files,
-      };
+      return { ...pr, files };
     })
   );
 
   return {
-    previousTag: previousTag.tag_name,
+    previousTag: previousTag.name,
     merged: prsWithFiles.filter((pr) => {
       return pr.files.some((file) => {
         return checkIfStringStartsWith(file.filename, PR_FILES_STARTS_WITH);
@@ -153,6 +174,82 @@ async function getIssuesLinkedToPullRequest(prHtmlUrl, nodes = [], after) {
       prHtmlUrl,
       nodes,
       res?.resource?.closingIssuesReferences?.pageInfo?.endCursor
+    );
+  }
+
+  return nodes;
+}
+
+/**
+ * @typedef {Object} Node
+ * @property {string} name
+ * @property {Object} [target]
+ * @property {Object} target.tagger
+ * @property {string} target.tagger.date
+ */
+
+/**
+ * @param {string} owner
+ * @param {string} repo
+ * @param {Array<Node>} [nodes]
+ * @param {string} [after]
+ * @returns {Promise<Array<Node>>}
+ */
+// TODO: only fetch until we get to the last stable
+async function getAllTags(owner, repo, nodes = [], after) {
+  /**
+   * @typedef {Object} TagsResponse
+   * @property {Object} repository
+   * @property {Object} repository.refs
+   * @property {Object} repository.refs.pageInfo
+   * @property {boolean} repository.refs.pageInfo.hasNextPage
+   * @property {string} repository.refs.pageInfo.endCursor
+   * @property {Array<Node>} repository.refs.edges
+   */
+
+  /** @type {TagsResponse} */
+  let res = await graphqlWithAuth(
+    gql`
+      query GET_TAGS($owner: String!, $repo: String!, $after: String) {
+        repository(owner: $owner, name: $repo) {
+          refs(
+            refPrefix: "refs/tags/"
+            first: 100
+            after: $after
+            orderBy: { field: TAG_COMMIT_DATE, direction: DESC }
+          ) {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+            edges {
+              node {
+                name
+                target {
+                  ... on Tag {
+                    tagger {
+                      date
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `,
+    { owner, repo, after }
+  );
+
+  let newNodes = res?.repository?.refs?.edges ?? [];
+  nodes.push(...newNodes);
+
+  if (res?.repository?.refs?.pageInfo?.hasNextPage) {
+    return getAllTags(
+      owner,
+      repo,
+      nodes,
+      res?.repository?.refs?.pageInfo?.endCursor
     );
   }
 

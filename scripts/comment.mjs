@@ -4,7 +4,12 @@ import {
   getIssuesClosedByPullRequests,
   prsMergedSinceLastTag,
 } from "./octokit.mjs";
-import { LATEST_RELEASE, OWNER, REPO } from "./constants.mjs";
+import {
+  LATEST_RELEASE,
+  OWNER,
+  PR_FILES_STARTS_WITH,
+  REPO,
+} from "./constants.mjs";
 
 async function commentOnIssuesAndPrsAboutRelease() {
   if (LATEST_RELEASE.includes("experimental")) {
@@ -18,8 +23,11 @@ async function commentOnIssuesAndPrsAboutRelease() {
   });
 
   let suffix = merged.length === 1 ? "" : "s";
+  let prFilesDirs = PR_FILES_STARTS_WITH.join(", ");
   console.log(
-    `Found ${merged.length} PR${suffix} merged since previous release (current: ${LATEST_RELEASE}, previous: ${previousTag})`
+    `Found ${merged.length} PR${suffix} merged ` +
+      `that touched \`${prFilesDirs}\` since ` +
+      `previous release (current: ${LATEST_RELEASE}, previous: ${previousTag})`
   );
 
   let promises = [];
