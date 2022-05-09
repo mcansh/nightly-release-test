@@ -1,5 +1,6 @@
+import { RestEndpointMethodTypes } from "@octokit/rest";
 import semver from "semver";
-import { PR_FILES_STARTS_WITH } from "./constants";
+import { PR_FILES_STARTS_WITH, DEV_BRANCH, DEFAULT_BRANCH } from "./constants";
 import { gql, graphqlWithAuth, octokit } from "./octokit";
 import { checkIfStringStartsWith, MinimalTag, sortByDate } from "./utils";
 
@@ -18,26 +19,18 @@ export async function prsMergedSinceLastTag({
     tags
   );
 
-  let prs = await octokit.paginate(octokit.pulls.list, {
+  let prs = await getMergedPRsBetweenTags(
     owner,
     repo,
-    state: "closed",
-    sort: "updated",
-    direction: "desc",
-    per_page: 100,
-  });
-
-  let startDate = previousTag.date;
-  let endDate = currentTag.date;
-
-  let mergedPullRequestsSinceLastTag = prs.filter((pullRequest) => {
-    if (!pullRequest.merged_at) return false;
-    let mergedDate = new Date(pullRequest.merged_at);
-    return mergedDate > startDate && mergedDate < endDate;
-  });
+    previousTag,
+    currentTag,
+    currentTag.isPrerelease && previousTag.isPrerelease
+      ? DEV_BRANCH
+      : DEFAULT_BRANCH
+  );
 
   let prsWithFiles = await Promise.all(
-    mergedPullRequestsSinceLastTag.map(async (pr) => {
+    prs.map(async (pr) => {
       let files = await octokit.paginate(octokit.pulls.listFiles, {
         owner,
         repo,
@@ -61,18 +54,20 @@ export async function prsMergedSinceLastTag({
 
 function getPreviousTagFromCurrentTag(
   currentTag: string,
-  tags: Array<GitHubTagNode>
+  tags: Awaited<ReturnType<typeof getAllTags>>
 ): {
   previousTag: MinimalTag;
   currentTag: MinimalTag;
 } {
   let validTags = tags
     .map((tag) => {
-      if (!tag.node.target.tagger?.date) return;
-      let isPrerelease = semver.prerelease(tag.node.name) !== null;
+      let isPrerelease = semver.prerelease(tag.name) !== null;
+
+      if (!tag.commit.committer?.date) return null;
+
       return {
-        tag: tag.node.name,
-        date: new Date(tag.node.target.tagger.date),
+        tag: tag.name,
+        date: new Date(tag.commit.committer.date),
         isPrerelease,
       };
     })
@@ -106,8 +101,6 @@ function getPreviousTagFromCurrentTag(
       throw new Error(`Could not find previous stable tag from ${currentTag}`);
     }
 
-    console.log({ currentTag: currentTagInfo, previousTag: previousTagInfo });
-
     return { currentTag: currentTagInfo, previousTag: previousTagInfo };
   }
 
@@ -123,94 +116,76 @@ function getPreviousTagFromCurrentTag(
     );
   }
 
-  console.log({ currentTag: currentTagInfo, previousTag: previousTagInfo });
-
-  if (previousTagInfo.date > tmpCurrentTagInfo.date) {
-    console.log("previous tag is newer");
-  }
-
   return {
     currentTag: currentTagInfo,
     previousTag: previousTagInfo,
   };
 }
 
-interface GitHubTagNode {
-  node: {
-    name: string;
-    target: {
-      tagger?: {
-        date: string;
-      };
-    };
-  };
-}
-
-interface GitHubTagsResponse {
-  repository: {
-    refs: {
-      pageInfo: {
-        endCursor: string;
-        hasNextPage: boolean;
-      };
-      edges: Array<GitHubTagNode>;
-    };
-  };
-}
-
-// TODO: only fetch until we get to the last stable
-async function getAllTags(
+async function getMergedPRsBetweenTags(
   owner: string,
   repo: string,
-  nodes: Array<GitHubTagNode> = [],
-  after?: string
-): Promise<Array<GitHubTagNode>> {
-  let res: GitHubTagsResponse = await graphqlWithAuth(
-    gql`
-      query GET_TAGS($owner: String!, $repo: String!, $after: String) {
-        repository(owner: $owner, name: $repo) {
-          refs(
-            refPrefix: "refs/tags/"
-            first: 100
-            after: $after
-            orderBy: { field: TAG_COMMIT_DATE, direction: DESC }
-          ) {
-            pageInfo {
-              hasNextPage
-              endCursor
-            }
-            edges {
-              node {
-                name
-                target {
-                  ... on Tag {
-                    tagger {
-                      date
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `,
-    { owner, repo, after }
-  );
+  startTag: MinimalTag,
+  endTag: MinimalTag,
+  baseRef: string,
+  page: number = 1,
+  nodes: RestEndpointMethodTypes["pulls"]["list"]["response"]["data"] = []
+): Promise<RestEndpointMethodTypes["pulls"]["list"]["response"]["data"]> {
+  let count = 100;
 
-  let newNodes = res?.repository?.refs?.edges ?? [];
-  nodes.push(...newNodes);
+  let pulls = await octokit.pulls.list({
+    owner,
+    repo,
+    state: "closed",
+    sort: "updated",
+    direction: "desc",
+    per_page: count,
+    page,
+    baseRef,
+  });
 
-  if (res?.repository?.refs?.pageInfo?.hasNextPage) {
-    return getAllTags(
+  let merged = pulls.data.filter((pull) => {
+    if (!pull.merged_at) return;
+    let mergedDate = new Date(pull.merged_at);
+    return mergedDate > startTag.date && mergedDate < endTag.date;
+  });
+
+  if (pulls.data.length !== 0) {
+    return getMergedPRsBetweenTags(
       owner,
       repo,
-      nodes,
-      res?.repository?.refs?.pageInfo?.endCursor
+      startTag,
+      endTag,
+      baseRef,
+      page + 1,
+      [...nodes, ...merged]
     );
   }
 
-  return nodes;
+  return [...nodes, ...merged];
+}
+
+// TODO: only fetch until we get to the last stable
+async function getAllTags(owner: string, repo: string) {
+  let tags = await octokit.paginate(octokit.rest.repos.listTags, {
+    owner,
+    repo,
+  });
+
+  return await Promise.all(
+    tags.map(async (tag) => {
+      let commit = await octokit.rest.repos.getCommit({
+        owner,
+        repo,
+        ref: tag.commit.sha,
+      });
+
+      return {
+        ...tag,
+        commit: commit.data.commit,
+      };
+    })
+  );
 }
 
 export async function getIssuesClosedByPullRequests(
