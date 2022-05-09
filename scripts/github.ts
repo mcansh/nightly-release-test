@@ -18,7 +18,7 @@ interface PrsMergedSinceLastTagOptions {
 
 interface PrsMergedSinceLastTagResult {
   merged: Awaited<ReturnType<typeof getPullRequestWithFiles>>;
-  previousTag: MinimalTag;
+  previousTag: string;
 }
 
 export async function prsMergedSinceLastTag({
@@ -46,7 +46,7 @@ export async function prsMergedSinceLastTag({
 
   return {
     merged: prsThatTouchedFiles,
-    previousTag,
+    previousTag: previousTag.tag,
   };
 }
 
