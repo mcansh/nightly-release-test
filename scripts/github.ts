@@ -4,15 +4,28 @@ import { PR_FILES_STARTS_WITH, DEV_BRANCH, DEFAULT_BRANCH } from "./constants";
 import { gql, graphqlWithAuth, octokit } from "./octokit";
 import { checkIfStringStartsWith, MinimalTag, sortByDate } from "./utils";
 
+type PullRequest =
+  RestEndpointMethodTypes["pulls"]["list"]["response"]["data"][number];
+
+type PullRequestFiles =
+  RestEndpointMethodTypes["pulls"]["listFiles"]["response"]["data"];
+
+interface PrsMergedSinceLastTagOptions {
+  owner: string;
+  repo: string;
+  githubRef: string;
+}
+
+interface PrsMergedSinceLastTagResult {
+  merged: Awaited<ReturnType<typeof getPullRequestWithFiles>>;
+  previousTag: MinimalTag;
+}
+
 export async function prsMergedSinceLastTag({
   owner,
   repo,
   githubRef,
-}: {
-  owner: string;
-  repo: string;
-  githubRef: string;
-}): Promise<{ merged: Array<any>; previousTag: string }> {
+}: PrsMergedSinceLastTagOptions): Promise<PrsMergedSinceLastTagResult> {
   let tags = await getAllTags(owner, repo);
   let { currentTag, previousTag } = getPreviousTagFromCurrentTag(
     githubRef,
@@ -29,6 +42,23 @@ export async function prsMergedSinceLastTag({
       : DEFAULT_BRANCH
   );
 
+  let prsThatTouchedFiles = await getPullRequestWithFiles(owner, repo, prs);
+
+  return {
+    merged: prsThatTouchedFiles,
+    previousTag,
+  };
+}
+
+type PullRequestWithFiles = PullRequest & {
+  files: PullRequestFiles;
+};
+
+async function getPullRequestWithFiles(
+  owner: string,
+  repo: string,
+  prs: Array<PullRequest>
+): Promise<Array<PullRequestWithFiles>> {
   let prsWithFiles = await Promise.all(
     prs.map(async (pr) => {
       let files = await octokit.paginate(octokit.pulls.listFiles, {
@@ -42,14 +72,11 @@ export async function prsMergedSinceLastTag({
     })
   );
 
-  return {
-    previousTag: previousTag.tag,
-    merged: prsWithFiles.filter((pr) => {
-      return pr.files.some((file) => {
-        return checkIfStringStartsWith(file.filename, PR_FILES_STARTS_WITH);
-      });
-    }),
-  };
+  return prsWithFiles.filter((pr) => {
+    return pr.files.some((file) => {
+      return checkIfStringStartsWith(file.filename, PR_FILES_STARTS_WITH);
+    });
+  });
 }
 
 function getPreviousTagFromCurrentTag(
@@ -129,8 +156,8 @@ async function getMergedPRsBetweenTags(
   endTag: MinimalTag,
   baseRef: string,
   page: number = 1,
-  nodes: RestEndpointMethodTypes["pulls"]["list"]["response"]["data"] = []
-): Promise<RestEndpointMethodTypes["pulls"]["list"]["response"]["data"]> {
+  nodes: Array<PullRequest> = []
+): Promise<Array<PullRequest>> {
   let count = 100;
 
   let pulls = await octokit.pulls.list({
@@ -190,7 +217,7 @@ async function getAllTags(owner: string, repo: string) {
 
 export async function getIssuesClosedByPullRequests(
   prHtmlUrl: string,
-  prBody: string | undefined
+  prBody: string | null
 ): Promise<Array<number>> {
   let linkedIssues = await getIssuesLinkedToPullRequest(prHtmlUrl);
   if (!prBody) return linkedIssues.map((issue) => issue.number);
