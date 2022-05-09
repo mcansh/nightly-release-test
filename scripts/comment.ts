@@ -1,10 +1,4 @@
-import {
-  REF,
-  OWNER,
-  REPO,
-  PR_FILES_STARTS_WITH,
-  GITHUB_REPOSITORY,
-} from "./constants";
+import { REF, OWNER, REPO, PR_FILES_STARTS_WITH } from "./constants";
 import {
   commentOnIssue,
   commentOnPullRequest,
@@ -38,14 +32,14 @@ async function commentOnIssuesAndPrsAboutRelease() {
   for (let pr of merged) {
     console.log(`commenting on pr ${getGitHubUrl("pull", pr.number)}`);
 
-    // promises.push(
-    //   commentOnPullRequest({
-    //     owner: OWNER,
-    //     repo: REPO,
-    //     pr: pr.number,
-    //     version: LATEST_RELEASE,
-    //   })
-    // );
+    promises.push(
+      commentOnPullRequest({
+        owner: OWNER,
+        repo: REPO,
+        pr: pr.number,
+        version: REF,
+      })
+    );
 
     let issuesClosed = await getIssuesClosedByPullRequests(
       pr.html_url,
@@ -60,14 +54,14 @@ async function commentOnIssuesAndPrsAboutRelease() {
       }
       issuesCommentedOn.add(issueNumber);
       console.log(`commenting on issue ${getGitHubUrl("issue", issueNumber)}`);
-      // promises.push(
-      //   commentOnIssue({
-      //     issue: issueNumber,
-      //     owner: OWNER,
-      //     repo: REPO,
-      //     version: REF,
-      //   })
-      // );
+      promises.push(
+        commentOnIssue({
+          issue: issueNumber,
+          owner: OWNER,
+          repo: REPO,
+          version: REF,
+        })
+      );
     }
   }
 
