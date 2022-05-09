@@ -1,7 +1,7 @@
 import { Octokit as RestOctokit } from "@octokit/rest";
 import { paginateRest } from "@octokit/plugin-paginate-rest";
 
-import { LATEST_RELEASE, OWNER, REPO, GITHUB_TOKEN } from "./constants.mjs";
+import { REF, OWNER, REPO, GITHUB_TOKEN } from "./constants";
 
 const Octokit = RestOctokit.plugin(paginateRest);
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
@@ -18,9 +18,7 @@ async function deleteNightlies() {
   });
 
   for (let release of filtered) {
-    if (release.tag_name === LATEST_RELEASE) {
-      continue;
-    }
+    if (release.tag_name === REF) continue;
     console.log(`deleting release ${release.tag_name}`);
     await octokit.rest.repos.deleteRelease({
       owner: OWNER,
