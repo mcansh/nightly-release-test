@@ -29,3 +29,5 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
           VERSION: ${{ github.event.client_payload.ref }}
+          DEFAULT_BRANCH: "main"
+          DEV_BRANCH: "dev"
