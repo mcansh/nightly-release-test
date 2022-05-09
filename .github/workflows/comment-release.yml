@@ -24,8 +24,10 @@ jobs:
         run: npm install
 
       - name: Comment on issues
-        run: node ./scripts/comment.mjs
+        run: node -r esbuild-register scripts/comment.ts
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
           VERSION: ${{ github.event.client_payload.ref }}
+          DEFAULT_BRANCH: "main"
+          DEV_BRANCH: "dev"
