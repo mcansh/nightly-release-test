@@ -1,8 +1,7 @@
 name: Comment on Release
 
 on:
-  repository_dispatch:
-    types: [release]
+  workflow_call:
 
 jobs:
   comment:
@@ -28,6 +27,6 @@ jobs:
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
-          VERSION: ${{ github.event.client_payload.ref }}
+          VERSION: ${{ inputs.ref }}
           DEFAULT_BRANCH: "main"
           DEV_BRANCH: "dev"

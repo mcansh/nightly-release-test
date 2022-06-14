@@ -94,10 +94,6 @@ jobs:
     needs: [nightly]
     name: 🛴 Kick off comment and deployment test workflows
     if: github.repository == 'mcansh/nightly-release-test'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.NIGHTLY_PAT }}
-          event-type: release
-          client-payload: '{ "ref": "refs/tags/v${{ needs.nightly.outputs.NEXT_VERSION }}" }'
+    uses: mcansh/nightly-release-test/.github/workflows/comment-release.yml@main
+    with:
+      ref: "refs/tags/v${{ needs.nightly.outputs.NEXT_VERSION }}"
