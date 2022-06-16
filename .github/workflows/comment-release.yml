@@ -33,4 +33,4 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.ref }}
           DEFAULT_BRANCH: "main"
-          DEV_BRANCH: "dev"
+          NIGHTLY_BRANCH: "dev"
