@@ -1,8 +1,14 @@
-import { RestEndpointMethodTypes } from "@octokit/rest";
-import semver from "semver";
-import { PR_FILES_STARTS_WITH, DEV_BRANCH, DEFAULT_BRANCH } from "./constants";
+import type { RestEndpointMethodTypes } from "@octokit/rest";
+import * as semver from "semver";
+
+import {
+  PR_FILES_STARTS_WITH,
+  NIGHTLY_BRANCH,
+  DEFAULT_BRANCH,
+} from "./constants";
 import { gql, graphqlWithAuth, octokit } from "./octokit";
-import { checkIfStringStartsWith, MinimalTag, sortByDate } from "./utils";
+import type { MinimalTag } from "./utils";
+import { checkIfStringStartsWith, sortByDate } from "./utils";
 
 type PullRequest =
   RestEndpointMethodTypes["pulls"]["list"]["response"]["data"][number];
@@ -38,7 +44,7 @@ export async function prsMergedSinceLastTag({
     previousTag,
     currentTag,
     currentTag.isPrerelease && previousTag.isPrerelease
-      ? DEV_BRANCH
+      ? NIGHTLY_BRANCH
       : DEFAULT_BRANCH
   );
 
@@ -172,7 +178,7 @@ async function getMergedPRsBetweenTags(
   });
 
   let merged = pulls.data.filter((pull) => {
-    if (!pull.merged_at) return;
+    if (!pull.merged_at) return false;
     let mergedDate = new Date(pull.merged_at);
     return mergedDate > startTag.date && mergedDate < endTag.date;
   });
@@ -192,7 +198,6 @@ async function getMergedPRsBetweenTags(
   return [...nodes, ...merged];
 }
 
-// TODO: only fetch until we get to the last stable
 async function getAllTags(owner: string, repo: string) {
   let tags = await octokit.paginate(octokit.rest.repos.listTags, {
     owner,
