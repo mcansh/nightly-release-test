@@ -13,7 +13,7 @@ on:
 jobs:
   nightly:
     name: 🌒 Nightly Release
-    if: github.repository == 'mcansh/nightly-release-test' && needs.nightly.outputs.NEXT_VERSION
+    if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
     outputs:
       # allows this to be used in the `comment` job below
