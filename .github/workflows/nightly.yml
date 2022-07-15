@@ -84,7 +84,7 @@ jobs:
 
       - name: 🚀 Publish
         if: steps.version.outputs.NEXT_VERSION
-        run: npm publish
+        run: node ./scripts/publish.mjs
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
