@@ -1,0 +1,10 @@
+{
+    "name": "@mcansh/nightly-release-test-two",
+    "version": "1.0.4",
+    "main": "index.js",
+    "scripts": {
+      "build": "tsc"
+    },
+    "dependencies": {},
+    "devDependencies": {}
+  }

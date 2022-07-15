@@ -1,11 +1,13 @@
 {
   "name": "@mcansh/nightly-release-test",
-  "version": "1.0.4",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "npm run -w build",
     "comment": "node -r dotenv/config -r esbuild-register scripts/comment.ts"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "devDependencies": {
     "@tsconfig/node16": "1.0.2",
     "@types/node": "17.0.23",
