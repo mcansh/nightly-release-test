@@ -71,12 +71,12 @@ jobs:
               git commit -m "dirty working directory..."
             fi
 
-            npm version ${NEXT_VERSION}
+            npm version -ws ${NEXT_VERSION}
           fi
 
       - name: 🏗 Build
         if: steps.version.outputs.NEXT_VERSION
-        run: yarn build
+        run: npm run build
 
       - name: 🏷 Push Tag
         if: steps.version.outputs.NEXT_VERSION
@@ -91,7 +91,7 @@ jobs:
   comment:
     needs: [nightly]
     name: 📝 Comment on related issues and pull requests
-    if: github.repository == 'mcansh/nightly-release-test'
-    uses: mcansh/nightly-release-test/.github/workflows/comment-release.yml@main
+    if: github.repository == 'mcansh/nightly-release-test' && needs.nightly.outputs.NEXT_VERSION
+    uses: mcansh/nightly-release-test/.github/workflows/comment-release.yml
     with:
       ref: "refs/tags/v${{ needs.nightly.outputs.NEXT_VERSION }}"
