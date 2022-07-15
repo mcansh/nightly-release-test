@@ -36,14 +36,6 @@ jobs:
         # then open a PR with the related changes for the new version. After the
         # PR is merged, the workflow will run again and this action will build +
         # publish to npm.
-      - name: Creating .npmrc
-        run: |
-          cat << EOF > "$HOME/.npmrc"
-            //registry.npmjs.org/:_authToken=$NPM_TOKEN
-          EOF
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: 🚀 PR / Publish
         id: changesets
         uses: changesets/action@v1
@@ -54,3 +46,4 @@ jobs:
           publish: npm run changeset:release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
