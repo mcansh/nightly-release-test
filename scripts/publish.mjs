@@ -38,8 +38,8 @@ async function run() {
 
   let packages = await fse.readdir(PACKAGES_DIR);
 
-  for (let package of packages) {
-    publish(path.join(PACKAGES_DIR, package), tag);
+  for (let pkg of packages) {
+    publish(path.join(PACKAGES_DIR, pkg), tag);
   }
 }
 
