@@ -6,9 +6,7 @@ import semver from "semver";
 let PACKAGES_DIR = path.join(process.cwd(), "packages");
 
 function getTaggedVersion() {
-  let output = execSync(process.env.NEXT_VERSION)
-    .toString()
-    .trim();
+  let output = process.env.NEXT_VERSION.toString().trim();
   return output.replace(/^v/g, "");
 }
 
