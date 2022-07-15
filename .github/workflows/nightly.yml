@@ -92,6 +92,6 @@ jobs:
     needs: [nightly]
     name: 📝 Comment on related issues and pull requests
     if: github.repository == 'mcansh/nightly-release-test' && needs.nightly.outputs.NEXT_VERSION
-    uses: mcansh/nightly-release-test/.github/workflows/comment-release.yml@main
+    uses: mcansh/nightly-release-test/.github/workflows/comment-release.yml
     with:
       ref: "refs/tags/v${{ needs.nightly.outputs.NEXT_VERSION }}"
