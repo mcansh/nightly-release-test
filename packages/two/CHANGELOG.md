@@ -1,5 +1,13 @@
 # @mcansh/nightly-release-test-two
 
+## 1.0.6
+
+### Patch Changes
+
+- 57250ad: new stuff
+- b9b805a: nice
+- 79a3345: ploop v2
+
 ## 1.0.5
 
 ### Patch Changes
