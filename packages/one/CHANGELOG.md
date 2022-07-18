@@ -1,5 +1,13 @@
 # @mcansh/nightly-release-test-one
 
+## 1.0.7
+
+### Patch Changes
+
+- 2139284: update trigger for ci
+- 5294609: more stuff
+- 4e59007: i suck at changesets in here lol
+
 ## 1.0.6
 
 ### Patch Changes
