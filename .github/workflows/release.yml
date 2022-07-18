@@ -3,8 +3,8 @@ name: 🕊 Release
 on:
   push:
     tags:
-      # only run on `nightly-release-test-two` tags
-      - "nightly-release-test-two@*"
+      # only run on `@mcansh/nightly-release-test-two` tags
+      - "@mcansh/nightly-release-test-two@*"
 
 jobs:
   comment:
