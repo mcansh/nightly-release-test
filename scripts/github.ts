@@ -109,8 +109,6 @@ function getPreviousTagFromCurrentTag(
     .filter((v: any): v is MinimalTag => typeof v !== "undefined")
     .sort(sortByDate);
 
-  console.log(validTags);
-
 
   let tmpCurrentTagIndex = validTags.findIndex((tag) => tag.tag === currentTag);
   let tmpCurrentTagInfo = validTags.at(tmpCurrentTagIndex);
