@@ -21,3 +21,6 @@ export const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
 export const DEFAULT_BRANCH = process.env.DEFAULT_BRANCH;
 export const NIGHTLY_BRANCH = process.env.NIGHTLY_BRANCH;
 export const PR_FILES_STARTS_WITH = ["packages/"];
+// this one is optional, nightlies only create a single tag,
+// but stable releases create one for each package
+export const PACKAGE_TO_WATCH = process.env.PACKAGE_TO_WATCH;

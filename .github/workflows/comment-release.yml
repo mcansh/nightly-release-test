@@ -6,6 +6,9 @@ on:
       ref:
         required: true
         type: string
+      packageToWatch:
+        required: false
+        type: string
 
 jobs:
   comment:
@@ -28,18 +31,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Get Version
-        id: version
-        run: |
-          NODE_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          VERSION=$(npm info @mcansh/nightly-release-test-two version)
-          echo ::set-output name=VERSION::${VERSION}
-
       - name: Comment on issues
         run: node -r esbuild-register scripts/comment.ts
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.version.outputs.VERSION }}
+          VERSION: ${{ github.ref }}
           DEFAULT_BRANCH: "main"
           NIGHTLY_BRANCH: "dev"
+          PACKAGE_TO_WATCH: ${{ inputs.packageToWatch }}
