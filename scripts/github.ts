@@ -1,14 +1,9 @@
 import type { RestEndpointMethodTypes } from "@octokit/rest";
 import * as semver from "semver";
 
-import {
-  PR_FILES_STARTS_WITH,
-  NIGHTLY_BRANCH,
-  DEFAULT_BRANCH,
-  PACKAGE_TO_WATCH,
-} from "./constants";
+import { PR_FILES_STARTS_WITH, NIGHTLY_BRANCH, DEFAULT_BRANCH, PACKAGE_TO_WATCH } from "./constants";
 import { gql, graphqlWithAuth, octokit } from "./octokit";
-import type { MinimalTag } from "./utils";
+import { cleanupTagName, MinimalTag } from "./utils";
 import { checkIfStringStartsWith, sortByDate } from "./utils";
 
 type PullRequest =
@@ -94,19 +89,28 @@ function getPreviousTagFromCurrentTag(
   currentTag: MinimalTag;
 } {
   let validTags = tags
+    .filter((tag) => {
+      if (PACKAGE_TO_WATCH) {
+        return tag.name.startsWith(PACKAGE_TO_WATCH);
+      }
+      return true;
+    })
     .map((tag) => {
       let isPrerelease = semver.prerelease(tag.name) !== null;
 
       if (!tag.commit.committer?.date) return null;
 
       return {
-        tag: PACKAGE_TO_WATCH ? tag.name.replace(PACKAGE_TO_WATCH, "") : tag.name,
+        tag: cleanupTagName(tag.name),
         date: new Date(tag.commit.committer.date),
         isPrerelease,
       };
     })
     .filter((v: any): v is MinimalTag => typeof v !== "undefined")
     .sort(sortByDate);
+
+  console.log(validTags);
+
 
   let tmpCurrentTagIndex = validTags.findIndex((tag) => tag.tag === currentTag);
   let tmpCurrentTagInfo = validTags.at(tmpCurrentTagIndex);
