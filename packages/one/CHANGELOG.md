@@ -1,5 +1,11 @@
 # @mcansh/nightly-release-test-one
 
+## 1.0.7
+
+### Patch Changes
+
+- 5294609: more stuff
+
 ## 1.0.6
 
 ### Patch Changes
