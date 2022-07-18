@@ -5,6 +5,7 @@ import {
   PR_FILES_STARTS_WITH,
   NIGHTLY_BRANCH,
   DEFAULT_BRANCH,
+  PACKAGE_TO_WATCH,
 } from "./constants";
 import { gql, graphqlWithAuth, octokit } from "./octokit";
 import type { MinimalTag } from "./utils";
@@ -99,7 +100,7 @@ function getPreviousTagFromCurrentTag(
       if (!tag.commit.committer?.date) return null;
 
       return {
-        tag: tag.name,
+        tag: PACKAGE_TO_WATCH ? tag.name.replace(PACKAGE_TO_WATCH, "") : tag.name,
         date: new Date(tag.commit.committer.date),
         isPrerelease,
       };
