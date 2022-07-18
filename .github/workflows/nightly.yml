@@ -3,7 +3,7 @@ name: 🌒 Nightly Release
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 19 * * *" # every day at 5PM EST
+    - cron: "30 19 * * *" # every day at 3:30 PM EST
 
 # HEADS UP! this workflow will only ever run on the `main` branch due to it being a cron job,
 # and the last commit on main will be what github shows as the trigger
@@ -59,7 +59,6 @@ jobs:
 
             DATE=$(date '+%Y%m%d')
             NEXT_VERSION=0.0.0-nightly-${SHORT_SHA}-${DATE}
-            echo ::set-output name=NEXT_VERSION::${NEXT_VERSION}
 
             git checkout -b nightly/${NEXT_VERSION}
 
@@ -72,6 +71,8 @@ jobs:
             fi
 
             npm version -ws ${NEXT_VERSION}
+
+            echo ::set-output name=NEXT_VERSION::${NEXT_VERSION}
           fi
 
       - name: 🏗 Build
@@ -84,14 +85,15 @@ jobs:
 
       - name: 🚀 Publish
         if: steps.version.outputs.NEXT_VERSION
-        run: npm publish
+        run: node ./scripts/publish.mjs
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEXT_VERSION: ${{ steps.version.outputs.NEXT_VERSION }}
 
   comment:
     needs: [nightly]
     name: 📝 Comment on related issues and pull requests
     if: github.repository == 'mcansh/nightly-release-test' && needs.nightly.outputs.NEXT_VERSION
-    uses: mcansh/nightly-release-test/.github/workflows/comment-release.yml
+    uses: ./.github/workflows/comment-release.yml
     with:
       ref: "refs/tags/v${{ needs.nightly.outputs.NEXT_VERSION }}"
