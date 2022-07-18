@@ -31,6 +31,7 @@ jobs:
       - name: Get Version
         id: version
         run: |
+          NODE_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
           VERSION=$(npm info @mcansh/nightly-release-test-two version)
           echo ::set-output name=VERSION::${VERSION}
 
