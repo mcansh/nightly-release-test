@@ -5,7 +5,7 @@ import {
   PR_FILES_STARTS_WITH,
   NIGHTLY_BRANCH,
   DEFAULT_BRANCH,
-  PACKAGE_TO_WATCH,
+  PACKAGE_VERSION_TO_FOLLOW,
 } from "./constants";
 import { gql, graphqlWithAuth, octokit } from "./octokit";
 import { cleanupTagName, MinimalTag } from "./utils";
@@ -117,8 +117,8 @@ function getPreviousTagFromCurrentTag(
 } {
   let validTags = tags
     .filter((tag) => {
-      if (PACKAGE_TO_WATCH) {
-        return tag.name.startsWith(PACKAGE_TO_WATCH);
+      if (PACKAGE_VERSION_TO_FOLLOW) {
+        return tag.name.startsWith(PACKAGE_VERSION_TO_FOLLOW);
       }
       return true;
     })

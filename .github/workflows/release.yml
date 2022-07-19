@@ -12,4 +12,4 @@ jobs:
     uses: ./.github/workflows/comment-release.yml
     with:
       ref: ${{ github.ref }}
-      packageToWatch: "@mcansh/nightly-release-test-two"
+      packageVersionToFollow: "@mcansh/nightly-release-test-two"

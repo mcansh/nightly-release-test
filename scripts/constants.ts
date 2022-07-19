@@ -22,7 +22,7 @@ if (!/^refs\/tags\//.test(process.env.VERSION)) {
 export const [OWNER, REPO] = process.env.GITHUB_REPOSITORY.split("/");
 // this one is optional, nightlies only create a single tag,
 // but stable releases create one for each package
-export const PACKAGE_TO_WATCH = process.env.PACKAGE_TO_WATCH;
+export const PACKAGE_VERSION_TO_FOLLOW = process.env.PACKAGE_VERSION_TO_FOLLOW;
 export const VERSION = cleanupTagName(cleanupRef(process.env.VERSION));
 export const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 export const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;

@@ -1,4 +1,4 @@
-import { GITHUB_REPOSITORY, PACKAGE_TO_WATCH } from "./constants";
+import { GITHUB_REPOSITORY, PACKAGE_VERSION_TO_FOLLOW } from "./constants";
 
 export function checkIfStringStartsWith(
   string: string,
@@ -23,8 +23,12 @@ export function getGitHubUrl(type: "pull" | "issue", number: number) {
 }
 
 export function cleanupTagName(tagName: string) {
-  let regex = new RegExp(`^${PACKAGE_TO_WATCH}@`);
-  return PACKAGE_TO_WATCH ? tagName.replace(regex, "") : tagName;
+  if (PACKAGE_VERSION_TO_FOLLOW) {
+    let regex = new RegExp(`^${PACKAGE_VERSION_TO_FOLLOW}@`);
+    return tagName.replace(regex, "");
+  }
+
+  return tagName;
 }
 
 export function cleanupRef(ref: string) {
