@@ -102,4 +102,4 @@ jobs:
     if: github.repository == 'mcansh/nightly-release-test' && needs.nightly.outputs.NEXT_VERSION
     uses: ./.github/workflows/comment-release.yml
     with:
-      ref: "refs/tags/v${{ needs.nightly.outputs.NEXT_VERSION }}"
+      ref: "${{ needs.nightly.outputs.NEXT_VERSION }}"
