@@ -1,7 +1,12 @@
 import type { RestEndpointMethodTypes } from "@octokit/rest";
 import * as semver from "semver";
 
-import { PR_FILES_STARTS_WITH, NIGHTLY_BRANCH, DEFAULT_BRANCH, PACKAGE_TO_WATCH } from "./constants";
+import {
+  PR_FILES_STARTS_WITH,
+  NIGHTLY_BRANCH,
+  DEFAULT_BRANCH,
+  PACKAGE_TO_WATCH,
+} from "./constants";
 import { gql, graphqlWithAuth, octokit } from "./octokit";
 import { cleanupTagName, MinimalTag } from "./utils";
 import { checkIfStringStartsWith, sortByDate } from "./utils";
@@ -34,15 +39,37 @@ export async function prsMergedSinceLastTag({
     tags
   );
 
-  let prs = await getMergedPRsBetweenTags(
-    owner,
-    repo,
-    previousTag,
-    currentTag,
-    currentTag.isPrerelease && previousTag.isPrerelease
-      ? NIGHTLY_BRANCH
-      : DEFAULT_BRANCH
-  );
+  let prs: Awaited<ReturnType<typeof getMergedPRsBetweenTags>> = [];
+
+  if (currentTag.isPrerelease && previousTag.isPrerelease) {
+    prs = await getMergedPRsBetweenTags(
+      owner,
+      repo,
+      previousTag,
+      currentTag,
+      currentTag.isPrerelease && previousTag.isPrerelease
+        ? NIGHTLY_BRANCH
+        : DEFAULT_BRANCH
+    );
+  } else {
+    let [nightly, stable] = await Promise.all([
+      getMergedPRsBetweenTags(
+        owner,
+        repo,
+        previousTag,
+        currentTag,
+        NIGHTLY_BRANCH
+      ),
+      getMergedPRsBetweenTags(
+        owner,
+        repo,
+        previousTag,
+        currentTag,
+        DEFAULT_BRANCH
+      ),
+    ]);
+    prs = nightly.concat(stable);
+  }
 
   let prsThatTouchedFiles = await getPullRequestWithFiles(owner, repo, prs);
 
@@ -108,7 +135,6 @@ function getPreviousTagFromCurrentTag(
     })
     .filter((v: any): v is MinimalTag => typeof v !== "undefined")
     .sort(sortByDate);
-
 
   let tmpCurrentTagIndex = validTags.findIndex((tag) => tag.tag === currentTag);
   let tmpCurrentTagInfo = validTags.at(tmpCurrentTagIndex);
