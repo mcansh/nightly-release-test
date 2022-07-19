@@ -1,0 +1,15 @@
+name: 🕊 Release
+
+on:
+  push:
+    tags:
+      # only run on `@mcansh/nightly-release-test-two` tags
+      - "@mcansh/nightly-release-test-two@*"
+
+jobs:
+  comment:
+    name: 📝 Comment on related issues and pull requests
+    uses: ./.github/workflows/release-comments.yml
+    with:
+      ref: ${{ github.ref }}
+      packageVersionToFollow: "@mcansh/nightly-release-test-two"
