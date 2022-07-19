@@ -123,12 +123,13 @@ function getPreviousTagFromCurrentTag(
       return true;
     })
     .map((tag) => {
-      let isPrerelease = semver.prerelease(tag.name) !== null;
+      let tagName = cleanupTagName(tag.name);
+      let isPrerelease = semver.prerelease(tagName) !== null;
 
       if (!tag.commit.committer?.date) return null;
 
       return {
-        tag: cleanupTagName(tag.name),
+        tag: tagName,
         date: new Date(tag.commit.committer.date),
         isPrerelease,
       };

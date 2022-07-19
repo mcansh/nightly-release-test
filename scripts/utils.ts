@@ -27,3 +27,7 @@ export function cleanupTagName(tagName: string) {
     ? tagName.replace(`${PACKAGE_TO_WATCH}@`, "")
     : tagName;
 }
+
+export function cleanupRef(ref: string) {
+  return cleanupTagName(ref.replace("refs/tags/", ""));
+}
