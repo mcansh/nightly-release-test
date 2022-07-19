@@ -72,6 +72,10 @@ jobs:
 
             npm version -ws ${NEXT_VERSION}
 
+            git tag ${NEXT_VERSION}
+
+            git push origin HEAD --tags
+
             echo ::set-output name=NEXT_VERSION::${NEXT_VERSION}
           fi
 
