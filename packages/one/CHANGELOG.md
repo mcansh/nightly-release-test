@@ -1,5 +1,15 @@
 # @mcansh/nightly-release-test-one
 
+## 1.1.0
+
+### Minor Changes
+
+- 1c838f6: minor change
+
+### Patch Changes
+
+- 4e98c11: stupid change
+
 ## 1.0.9
 
 ### Patch Changes
