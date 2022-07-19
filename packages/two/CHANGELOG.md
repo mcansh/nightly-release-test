@@ -1,5 +1,16 @@
 # @mcansh/nightly-release-test-two
 
+## 1.2.0
+
+### Minor Changes
+
+- 1c838f6: minor change
+
+### Patch Changes
+
+- 1132ab3: change
+- 5796741: add dev script
+
 ## 1.1.0
 
 ### Minor Changes
