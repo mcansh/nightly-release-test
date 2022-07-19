@@ -72,9 +72,11 @@ jobs:
 
             npm version -ws ${NEXT_VERSION}
 
-            git tag ${NEXT_VERSION}
+            git add .
 
-            git push origin --tags
+            git commit -m "🌒 Nightly Release ${NEXT_VERSION}"
+
+            git tag ${NEXT_VERSION}
 
             echo ::set-output name=NEXT_VERSION::${NEXT_VERSION}
           fi
