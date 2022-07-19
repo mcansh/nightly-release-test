@@ -74,7 +74,7 @@ jobs:
 
             git tag ${NEXT_VERSION}
 
-            git push origin HEAD --tags
+            git push origin --tags
 
             echo ::set-output name=NEXT_VERSION::${NEXT_VERSION}
           fi
