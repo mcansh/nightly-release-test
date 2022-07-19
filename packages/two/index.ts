@@ -1,1 +1,1 @@
-console.log("@mcansh/nightly-release-test-two");
+throw new Error("@mcansh/nightly-release-test-two");
