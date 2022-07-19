@@ -5,6 +5,7 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "npm run -ws dev",
     "build": "npm run -ws build",
     "changeset": "changeset",
     "changeset:release": "npm run build && changeset publish",
