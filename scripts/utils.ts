@@ -23,7 +23,10 @@ export function getGitHubUrl(type: "pull" | "issue", number: number) {
 }
 
 export function cleanupTagName(tagName: string) {
-  return PACKAGE_TO_WATCH
-    ? tagName.replace(`${PACKAGE_TO_WATCH}@`, "")
-    : tagName;
+  let regex = new RegExp(`^${PACKAGE_TO_WATCH}@`);
+  return PACKAGE_TO_WATCH ? tagName.replace(regex, "") : tagName;
+}
+
+export function cleanupRef(ref: string) {
+  return ref.replace(/^refs\/tags\//, "");
 }
