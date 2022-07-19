@@ -1,5 +1,11 @@
 # @mcansh/nightly-release-test-two
 
+## 1.2.1
+
+### Patch Changes
+
+- 97e1fa7: a simple change
+
 ## 1.2.0
 
 ### Minor Changes
