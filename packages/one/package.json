@@ -1,6 +1,6 @@
 {
   "name": "@mcansh/nightly-release-test-one",
-  "version": "1.2.1",
+  "version": "0.0.0-nightly-4e05480-20220721",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
