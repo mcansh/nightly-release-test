@@ -12,11 +12,7 @@ async function commentOnIssuesAndPrsAboutRelease() {
     return;
   }
 
-  let { merged, previousTag } = await prsMergedSinceLastTag({
-    owner: OWNER,
-    repo: REPO,
-    githubRef: VERSION,
-  });
+  let { merged, previousTag } = await prsMergedSinceLastTag(VERSION);
 
   let suffix = merged.length === 1 ? "" : "s";
   let prFilesDirs = PR_FILES_STARTS_WITH.join(", ");
@@ -32,14 +28,7 @@ async function commentOnIssuesAndPrsAboutRelease() {
   for (let pr of merged) {
     console.log(`commenting on pr ${getGitHubUrl("pull", pr.number)}`);
 
-    promises.push(
-      commentOnPullRequest({
-        owner: OWNER,
-        repo: REPO,
-        pr: pr.number,
-        version: VERSION,
-      })
-    );
+    promises.push(commentOnPullRequest({ pr: pr.number, version: VERSION }));
 
     let issuesClosed = await getIssuesClosedByPullRequests(
       pr.html_url,
@@ -54,14 +43,7 @@ async function commentOnIssuesAndPrsAboutRelease() {
       }
       issuesCommentedOn.add(issueNumber);
       console.log(`commenting on issue ${getGitHubUrl("issue", issueNumber)}`);
-      promises.push(
-        commentOnIssue({
-          issue: issueNumber,
-          owner: OWNER,
-          repo: REPO,
-          version: VERSION,
-        })
-      );
+      promises.push(commentOnIssue({ issue: issueNumber, version: VERSION }));
     }
   }
 
