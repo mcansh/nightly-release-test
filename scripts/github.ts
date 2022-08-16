@@ -356,12 +356,12 @@ export async function commentOnPullRequest({
   pr: number;
   version: string;
 }) {
-  // await octokit.issues.createComment({
-  //   owner,
-  //   repo,
-  //   issue_number: pr,
-  //   body: `🤖 Hello there,\n\nWe just published version \`${version}\` which includes this pull request. If you'd like to take it for a test run please try it out and let us know what you think!\n\nThanks!`,
-  // });
+  await octokit.issues.createComment({
+    owner,
+    repo,
+    issue_number: pr,
+    body: `🤖 Hello there,\n\nWe just published version \`${version}\` which includes this pull request. If you'd like to take it for a test run please try it out and let us know what you think!\n\nThanks!`,
+  });
 }
 
 export async function commentOnIssue({
@@ -375,10 +375,10 @@ export async function commentOnIssue({
   issue: number;
   version: string;
 }) {
-  // await octokit.issues.createComment({
-  //   owner,
-  //   repo,
-  //   issue_number: issue,
-  //   body: `🤖 Hello there,\n\nWe just published version \`${version}\` which involves this issue. If you'd like to take it for a test run please try it out and let us know what you think!\n\nThanks!`,
-  // });
+  await octokit.issues.createComment({
+    owner,
+    repo,
+    issue_number: issue,
+    body: `🤖 Hello there,\n\nWe just published version \`${version}\` which involves this issue. If you'd like to take it for a test run please try it out and let us know what you think!\n\nThanks!`,
+  });
 }
