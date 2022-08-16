@@ -6,11 +6,10 @@ import {
   NIGHTLY_BRANCH,
   DEFAULT_BRANCH,
   PACKAGE_VERSION_TO_FOLLOW,
-  OWNER,
-  REPO,
 } from "./constants";
 import { gql, graphqlWithAuth, octokit } from "./octokit";
-import { cleanupRef, cleanupTagName, MinimalTag } from "./utils";
+import type { MinimalTag } from "./utils";
+import { cleanupTagName } from "./utils";
 import { checkIfStringStartsWith, sortByDate } from "./utils";
 
 type PullRequest =
@@ -19,37 +18,69 @@ type PullRequest =
 type PullRequestFiles =
   RestEndpointMethodTypes["pulls"]["listFiles"]["response"]["data"];
 
+interface PrsMergedSinceLastTagOptions {
+  owner: string;
+  repo: string;
+  githubRef: string;
+}
+
 interface PrsMergedSinceLastTagResult {
   merged: Awaited<ReturnType<typeof getPullRequestWithFiles>>;
   previousTag: string;
 }
 
-export async function prsMergedSinceLastTag(
-  githubRef: string
-): Promise<PrsMergedSinceLastTagResult> {
-  let { currentTag, previousTag } = await getPreviousTagFromCurrentTag(
-    githubRef
+export async function prsMergedSinceLastTag({
+  owner,
+  repo,
+  githubRef,
+}: PrsMergedSinceLastTagOptions): Promise<PrsMergedSinceLastTagResult> {
+  let tags = await getTags(owner, repo);
+  let { currentTag, previousTag } = getPreviousTagFromCurrentTag(
+    githubRef,
+    tags
   );
 
+  console.log(`Getting PRs merged ${previousTag.tag}...${currentTag.tag}`);
+
+  /**
+    nightly > nightly => 'dev'
+    nightly > stable => 'main'
+    stable > nightly => 'dev'
+   */
   let prs: Awaited<ReturnType<typeof getMergedPRsBetweenTags>> = [];
 
+  // if both the current and previous tags are prereleases
+  // we can just get the PRs for the "dev" branch
+  // but if one of them is stable, we should wind up all of them from both the main and dev branches
   if (currentTag.isPrerelease && previousTag.isPrerelease) {
     prs = await getMergedPRsBetweenTags(
+      owner,
+      repo,
       previousTag,
       currentTag,
-      currentTag.isPrerelease && previousTag.isPrerelease
-        ? NIGHTLY_BRANCH
-        : DEFAULT_BRANCH
+      NIGHTLY_BRANCH
     );
   } else {
     let [nightly, stable] = await Promise.all([
-      getMergedPRsBetweenTags(previousTag, currentTag, NIGHTLY_BRANCH),
-      getMergedPRsBetweenTags(previousTag, currentTag, DEFAULT_BRANCH),
+      getMergedPRsBetweenTags(
+        owner,
+        repo,
+        previousTag,
+        currentTag,
+        NIGHTLY_BRANCH
+      ),
+      getMergedPRsBetweenTags(
+        owner,
+        repo,
+        previousTag,
+        currentTag,
+        DEFAULT_BRANCH
+      ),
     ]);
     prs = nightly.concat(stable);
   }
 
-  let prsThatTouchedFiles = await getPullRequestWithFiles(prs);
+  let prsThatTouchedFiles = await getPullRequestWithFiles(owner, repo, prs);
 
   return {
     merged: prsThatTouchedFiles,
@@ -62,13 +93,15 @@ type PullRequestWithFiles = PullRequest & {
 };
 
 async function getPullRequestWithFiles(
+  owner: string,
+  repo: string,
   prs: Array<PullRequest>
 ): Promise<Array<PullRequestWithFiles>> {
   let prsWithFiles = await Promise.all(
     prs.map(async (pr) => {
       let files = await octokit.paginate(octokit.pulls.listFiles, {
-        owner: OWNER,
-        repo: REPO,
+        owner,
+        repo,
         per_page: 100,
         pull_number: pr.number,
       });
@@ -84,118 +117,49 @@ async function getPullRequestWithFiles(
   });
 }
 
-function filterTags(tags: Array<Tag>) {
-  return tags.filter((tag) => {
-    if (PACKAGE_VERSION_TO_FOLLOW) {
-      return tag.ref.startsWith(`refs/tags/${PACKAGE_VERSION_TO_FOLLOW}`);
-    }
-    return true;
-  });
-}
-
-function createMinimalTags(tags: Array<TagWithCommit>): Array<MinimalTag> {
-  return tags
+function getPreviousTagFromCurrentTag(
+  currentTag: string,
+  tags: Awaited<ReturnType<typeof getTags>>
+): {
+  previousTag: MinimalTag;
+  currentTag: MinimalTag;
+} {
+  let validTags = tags
     .map((tag) => {
-      let tagName = cleanupTagName(cleanupRef(tag.ref));
+      let tagName = cleanupTagName(tag.name);
       let isPrerelease = semver.prerelease(tagName) !== null;
-
-      if (!tag.commit.committer?.date) return null;
 
       return {
         tag: tagName,
-        date: new Date(tag.commit.committer.date),
+        date: new Date(tag.target.tagger.date),
         isPrerelease,
       };
     })
-    .filter((v: unknown): v is MinimalTag => typeof v !== "undefined")
+    .filter((v: any): v is MinimalTag => typeof v !== "undefined")
     .sort(sortByDate);
-}
 
-async function getCommitFromTag(tag: Tag) {
-  let { data: fullTag } = await octokit.git.getTag({
-    owner: OWNER,
-    repo: REPO,
-    tag_sha: tag.object.sha,
-  });
-
-  let { data: commit } = await octokit.git.getCommit({
-    owner: OWNER,
-    repo: REPO,
-    commit_sha: fullTag.object.sha,
-  });
-
-  return { ...tag, commit };
-}
-
-type Tag = Awaited<
-  ReturnType<typeof octokit.rest.git.listMatchingRefs>
->["data"][number];
-type TagWithCommit = Awaited<ReturnType<typeof getCommitFromTag>>;
-
-async function getPreviousTagFromCurrentTag(currentTag: string): Promise<{
-  previousTag: MinimalTag;
-  currentTag: MinimalTag;
-}> {
-  let isPrerelease = semver.prerelease(currentTag) !== null;
-  let { data: tags }: { data: Array<Tag> } = await octokit.request(
-    "GET /repos/{owner}/{repo}/git/refs/tags/{ref}",
-    {
-      owner: OWNER,
-      repo: REPO,
-      ref: isPrerelease ? "v0.0.0-nightly-" : `remix`,
-    }
-  );
-
-  let validTags = filterTags(tags);
-  let tagCommitPromises = validTags.map((tag) => getCommitFromTag(tag));
-  let validTagsWithCommit = await Promise.all(tagCommitPromises);
-  let minimalTags = createMinimalTags(validTagsWithCommit);
-  let tmpCurrentTagIndex = minimalTags.findIndex((tag) => {
-    return tag.tag === currentTag;
-  });
-
-  if (isPrerelease) {
-    minimalTags = minimalTags.sort((a, b) => {
-      return b.date.getTime() - a.date.getTime();
-    });
-  }
-
-  let tmpCurrentTagInfo = minimalTags.at(tmpCurrentTagIndex);
-
-  if (!tmpCurrentTagInfo) {
-    throw new Error(`Could not find last tag ${currentTag}`);
-  }
-
-  let currentTagInfo: MinimalTag | undefined;
+  let currentTagIndex = validTags.findIndex((tag) => tag.tag === currentTag);
+  let currentTagInfo: MinimalTag | undefined = validTags.at(currentTagIndex);
   let previousTagInfo: MinimalTag | undefined;
 
-  // if the currentTag was a stable tag, then we want to find the previous stable tag
-  if (!tmpCurrentTagInfo.isPrerelease) {
-    let stableTags = minimalTags
-      .filter((tag) => !tag.isPrerelease)
-      .sort((a, b) => semver.rcompare(a.tag, b.tag));
-
-    let stableTagIndex = stableTags.findIndex((tag) => tag.tag === currentTag);
-    currentTagInfo = stableTags.at(stableTagIndex);
-    if (!currentTagInfo) {
-      throw new Error(`Could not find last stable tag ${currentTag}`);
-    }
-
-    previousTagInfo = stableTags.at(stableTagIndex + 1);
-    if (!previousTagInfo) {
-      throw new Error(`No previous stable tag found from ${currentTag}`);
-    }
-
-    return { currentTag: currentTagInfo, previousTag: previousTagInfo };
-  }
-
-  currentTagInfo = tmpCurrentTagInfo;
   if (!currentTagInfo) {
     throw new Error(`Could not find last tag ${currentTag}`);
   }
 
-  previousTagInfo = minimalTags.at(tmpCurrentTagIndex + 1);
+  // if the currentTag was a stable tag, then we want to find the previous stable tag
+  if (!currentTagInfo.isPrerelease) {
+    validTags = validTags
+      .filter((tag) => !tag.isPrerelease)
+      .sort((a, b) => semver.rcompare(a.tag, b.tag));
 
+    currentTagIndex = validTags.findIndex((tag) => tag.tag === currentTag);
+    currentTagInfo = validTags.at(currentTagIndex);
+    if (!currentTagInfo) {
+      throw new Error(`Could not find last stable tag ${currentTag}`);
+    }
+  }
+
+  previousTagInfo = validTags.at(currentTagIndex + 1);
   if (!previousTagInfo) {
     throw new Error(
       `Could not find previous prerelease tag from ${currentTag}`
@@ -209,6 +173,8 @@ async function getPreviousTagFromCurrentTag(currentTag: string): Promise<{
 }
 
 async function getMergedPRsBetweenTags(
+  owner: string,
+  repo: string,
   startTag: MinimalTag,
   endTag: MinimalTag,
   baseRef: string,
@@ -216,8 +182,8 @@ async function getMergedPRsBetweenTags(
   nodes: Array<PullRequest> = []
 ): Promise<Array<PullRequest>> {
   let pulls = await octokit.pulls.list({
-    owner: OWNER,
-    repo: REPO,
+    owner,
+    repo,
     state: "closed",
     sort: "updated",
     direction: "desc",
@@ -233,13 +199,71 @@ async function getMergedPRsBetweenTags(
   });
 
   if (pulls.data.length !== 0) {
-    return getMergedPRsBetweenTags(startTag, endTag, baseRef, page + 1, [
-      ...nodes,
-      ...merged,
-    ]);
+    return getMergedPRsBetweenTags(
+      owner,
+      repo,
+      startTag,
+      endTag,
+      baseRef,
+      page + 1,
+      [...nodes, ...merged]
+    );
   }
 
   return [...nodes, ...merged];
+}
+
+interface GitHubGraphqlTag {
+  name: string;
+  target: {
+    oid: string;
+    tagger: {
+      date: string;
+    };
+  };
+}
+interface GitHubGraphqlTagResponse {
+  repository: {
+    refs: {
+      nodes: Array<GitHubGraphqlTag>;
+    };
+  };
+}
+
+async function getTags(owner: string, repo: string) {
+  let response: GitHubGraphqlTagResponse = await graphqlWithAuth(
+    gql`
+      query GET_TAGS($owner: String!, $repo: String!) {
+        repository(owner: $owner, name: $repo) {
+          refs(
+            refPrefix: "refs/tags/"
+            first: 100
+            orderBy: { field: TAG_COMMIT_DATE, direction: DESC }
+          ) {
+            nodes {
+              name
+              target {
+                oid
+                ... on Tag {
+                  tagger {
+                    date
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `,
+    { owner, repo }
+  );
+
+  return response.repository.refs.nodes.filter((node) => {
+    return (
+      node.name.startsWith(PACKAGE_VERSION_TO_FOLLOW) ||
+      node.name.startsWith("v0.0.0-nightly-")
+    );
+  });
 }
 
 export async function getIssuesClosedByPullRequests(
@@ -255,7 +279,7 @@ export async function getIssuesClosedByPullRequests(
    * https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword
    */
   let regex =
-    /(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s#([0-9]+)/gi;
+    /(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)(:)?\s#([0-9]+)/gi;
   let matches = prBody.match(regex);
   if (!matches) return linkedIssues.map((issue) => issue.number);
 
@@ -322,31 +346,39 @@ async function getIssuesLinkedToPullRequest(
 }
 
 export async function commentOnPullRequest({
+  owner,
+  repo,
   pr,
   version,
 }: {
+  owner: string;
+  repo: string;
   pr: number;
   version: string;
 }) {
-  await octokit.issues.createComment({
-    owner: OWNER,
-    repo: REPO,
-    issue_number: pr,
-    body: `🤖 Hello there,\n\nWe just published version \`${version}\` which includes this pull request. If you'd like to take it for a test run please try it out and let us know what you think!\n\nThanks!`,
-  });
+  // await octokit.issues.createComment({
+  //   owner,
+  //   repo,
+  //   issue_number: pr,
+  //   body: `🤖 Hello there,\n\nWe just published version \`${version}\` which includes this pull request. If you'd like to take it for a test run please try it out and let us know what you think!\n\nThanks!`,
+  // });
 }
 
 export async function commentOnIssue({
+  owner,
+  repo,
   issue,
   version,
 }: {
+  owner: string;
+  repo: string;
   issue: number;
   version: string;
 }) {
-  await octokit.issues.createComment({
-    owner: OWNER,
-    repo: REPO,
-    issue_number: issue,
-    body: `🤖 Hello there,\n\nWe just published version \`${version}\` which involves this issue. If you'd like to take it for a test run please try it out and let us know what you think!\n\nThanks!`,
-  });
+  // await octokit.issues.createComment({
+  //   owner,
+  //   repo,
+  //   issue_number: issue,
+  //   body: `🤖 Hello there,\n\nWe just published version \`${version}\` which involves this issue. If you'd like to take it for a test run please try it out and let us know what you think!\n\nThanks!`,
+  // });
 }
