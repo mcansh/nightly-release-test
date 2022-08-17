@@ -103,3 +103,4 @@ jobs:
     uses: ./.github/workflows/release-comments.yml
     with:
       ref: "refs/tags/${{ needs.nightly.outputs.NEXT_VERSION }}"
+      packageVersionToFollow: "@mcansh/nightly-release-test-two"
