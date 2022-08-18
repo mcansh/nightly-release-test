@@ -10,7 +10,8 @@
     "changeset": "changeset",
     "changeset:release": "npm run build && changeset publish",
     "changeset:version": "changeset version",
-    "comment": "node -r dotenv/config -r esbuild-register scripts/comment.ts"
+    "comment": "node -r dotenv/config -r esbuild-register scripts/comment.ts",
+    "publish": "node ./scripts/publish.mjs"
   },
   "dependencies": {
     "@changesets/changelog-github": "0.4.5",
