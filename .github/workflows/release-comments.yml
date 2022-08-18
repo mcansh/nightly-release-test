@@ -1,4 +1,4 @@
-name: Comment on Release
+name: 📝 Comment on Release
 
 on:
   workflow_call:
@@ -16,23 +16,23 @@ jobs:
     if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
+      - name: ⬇️ Checkout repo
         uses: actions/checkout@v3
         with:
           ref: ${{ inputs.ref }}
 
-      - name: Setup node
+      - name: ⎔ Setup node
         uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: "npm"
           registry-url: "https://npm.pkg.github.com"
 
-      - name: Install dependencies
-        run: npm install
+      - name: 📥 Install deps
+        run: npm ci
 
-      - name: Comment on issues
-        run: node -r esbuild-register scripts/comment.ts
+      - name: 📝 Comment on issues
+        run: node -r esbuild-register ./scripts/comment.ts
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
