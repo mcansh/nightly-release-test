@@ -25,9 +25,11 @@ jobs:
 
       - name: 📥 Install deps
         run: npm ci
+        working-directory: scripts/release
 
       - name: 📝 Comment on issues
-        run: node -r esbuild-register ./scripts/release/comment.ts
+        working-directory: scripts/release
+        run: node -r esbuild-register ./comment.ts
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
