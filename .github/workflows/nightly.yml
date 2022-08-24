@@ -1,6 +1,7 @@
 name: 🌒 Nightly Release
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "30 19 * * *" # every day at 3:30 PM EST
 
