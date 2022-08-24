@@ -1,1 +1,1 @@
-console.warn("@mcansh/nightly-release-test-two 🤘");
+console.warn("@mcansh/nightly-release-test-two");
