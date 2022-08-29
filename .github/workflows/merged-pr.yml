@@ -6,6 +6,11 @@ on:
       - dev
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: dump github event
+        run: echo ${{ toJson(github) }}
   if_merged:
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
