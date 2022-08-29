@@ -130,6 +130,11 @@ function getPreviousTagFromCurrentTag(
       let tagName = cleanupTagName(tag.name);
       let isPrerelease = semver.prerelease(tagName) !== null;
 
+      console.log({
+        tagName,
+        date: tag?.target?.tagger?.date,
+      });
+
       return {
         tag: tagName,
         date: new Date(tag.target.tagger.date),
