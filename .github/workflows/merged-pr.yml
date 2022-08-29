@@ -1,9 +1,8 @@
 name: 📦 Merged PR
 
 on:
-  push:
-    branches:
-      - dev
+  pull_request:
+    types: [closed]
 
 jobs:
   if_merged:
