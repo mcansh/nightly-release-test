@@ -1,5 +1,11 @@
 # @mcansh/nightly-release-test-two
 
+## 1.2.2
+
+### Patch Changes
+
+- c4d0b98: chore: add exports
+
 ## 1.2.1
 
 ### Patch Changes
