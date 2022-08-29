@@ -4,8 +4,12 @@ on:
   pull_request:
     types: [closed]
 
+permissions:
+  pull-requests: write
+
 jobs:
   if_merged:
+    name: Add label to merged PR
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
@@ -13,4 +17,4 @@ jobs:
         with:
           labels: "awaiting release"
           number: ${{ github.event.pull_request.number }}
-          repo: "mcansh/nigthly-release-test"
+          repo: ${{ github.repository }}
