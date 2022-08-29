@@ -130,19 +130,13 @@ function getPreviousTagFromCurrentTag(
       let tagName = cleanupTagName(tag.name);
       let isPrerelease = semver.prerelease(tagName) !== null;
 
-      console.log({
-        tagName,
-        date: tag?.target?.tagger?.date,
-      });
-
       return {
         tag: tagName,
-        date: new Date(tag.target.tagger.date),
+        date: new Date(tag.target.committer.date),
         isPrerelease,
       };
     })
-    .filter((v: any): v is MinimalTag => typeof v !== "undefined")
-    .sort(sortByDate);
+    .filter((v: any): v is MinimalTag => typeof v !== "undefined");
 
   let currentTagIndex = validTags.findIndex((tag) => tag.tag === currentTag);
   let currentTagInfo: MinimalTag | undefined = validTags.at(currentTagIndex);
@@ -223,7 +217,7 @@ interface GitHubGraphqlTag {
   name: string;
   target: {
     oid: string;
-    tagger: {
+    committer: {
       date: string;
     };
   };
@@ -250,8 +244,8 @@ async function getTags(owner: string, repo: string) {
               name
               target {
                 oid
-                ... on Tag {
-                  tagger {
+                ... on Commit {
+                  committer {
                     date
                   }
                 }
