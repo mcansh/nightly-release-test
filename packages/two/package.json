@@ -1,11 +1,18 @@
 {
   "name": "@mcansh/nightly-release-test-two",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "mcansh/nightly-release-test",
     "directory": "packages/two"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
   "scripts": {
     "build": "tsc",

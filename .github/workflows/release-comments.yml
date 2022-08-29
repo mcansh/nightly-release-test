@@ -18,8 +18,6 @@ jobs:
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v3
-        with:
-          ref: ${{ inputs.ref }}
 
       - name: ⎔ Setup node
         uses: actions/setup-node@v3
@@ -27,12 +25,15 @@ jobs:
           node-version: 16
           cache: "npm"
           registry-url: "https://npm.pkg.github.com"
+          cache-dependency-path: "**/package-lock.json"
 
       - name: 📥 Install deps
-        run: npm ci
+        run: npm install
+        working-directory: ./scripts/release
 
       - name: 📝 Comment on issues
-        run: node -r esbuild-register ./scripts/comment.ts
+        working-directory: ./scripts/release
+        run: node -r esbuild-register ./comment.ts
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}

@@ -31,6 +31,7 @@ jobs:
           ref: dev
           # checkout using a custom token so that we can push later on
           token: ${{ secrets.NIGHTLY_PAT }}
+          fetch-depth: 0
 
       - name: ⎔ Setup node
         uses: actions/setup-node@v3
@@ -50,19 +51,17 @@ jobs:
           SHORT_SHA=${SHA::7}
 
           # get latest nightly tag
-          LATEST_NIGHTLY_TAG=$(git tag -l v0.0.0-nightly-\* --sort=-taggerdate | head -n 1)
+          LATEST_NIGHTLY_TAG=$(git tag -l v0.0.0-nightly-\* --sort=-committerdate | head -n 1)
 
-          # check if last commit to dev starts would be the nightly tag we're about to create (minus the date)
-          # if it is, we'll skip the nightly creation
-          # if not, we'll create a new nightly tag
-          if [[ ${LATEST_NIGHTLY_TAG} == v0.0.0-nightly-${SHORT_SHA}-* ]]; then
-            echo "🛑 Latest nightly tag is the same as the latest commit sha, skipping nightly release"
-          else
+          CHANGES=$(git diff dev..$LATEST_NIGHTLY_TAG -- ./packages/)
+
+          # check if there are changes to ./packages
+          if [[ -n $(echo $CHANGES | xargs) ]]; then
             git config --local user.email "hello@remix.run"
             git config --local user.name "Remix Run Bot"
 
             DATE=$(date '+%Y%m%d')
-            NEXT_VERSION=0.0.0-nightly-${SHORT_SHA}-${DATE}
+            NEXT_VERSION=v0.0.0-nightly-${SHORT_SHA}-${DATE}
 
             git checkout -b nightly/${NEXT_VERSION}
 
@@ -83,6 +82,8 @@ jobs:
             git tag ${NEXT_VERSION}
 
             echo ::set-output name=NEXT_VERSION::${NEXT_VERSION}
+          else
+            echo "🛑 no changes since last nightly, skipping..."
           fi
 
       - name: 🏗 Build
@@ -106,5 +107,5 @@ jobs:
     if: github.repository == 'mcansh/nightly-release-test' && needs.nightly.outputs.NEXT_VERSION
     uses: ./.github/workflows/release-comments.yml
     with:
-      ref: "refs/tags/v${{ needs.nightly.outputs.NEXT_VERSION }}"
+      ref: "refs/tags/${{ needs.nightly.outputs.NEXT_VERSION }}"
       packageVersionToFollow: "@mcansh/nightly-release-test-two"
