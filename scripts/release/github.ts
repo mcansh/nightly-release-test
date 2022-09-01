@@ -11,7 +11,7 @@ import {
 import { gql, graphqlWithAuth, octokit } from "./octokit";
 import type { MinimalTag } from "./utils";
 import { cleanupTagName } from "./utils";
-import { checkIfStringStartsWith, sortByDate } from "./utils";
+import { checkIfStringStartsWith } from "./utils";
 
 type PullRequest =
   RestEndpointMethodTypes["pulls"]["list"]["response"]["data"][number];
