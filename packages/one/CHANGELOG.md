@@ -1,5 +1,12 @@
 # @mcansh/nightly-release-test-one
 
+## 1.2.3
+
+### Patch Changes
+
+- e36ab97: chore: add exports to package one
+- cac3eb5: Update index.ts
+
 ## 1.2.2
 
 ## 1.2.1
