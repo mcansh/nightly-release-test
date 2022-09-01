@@ -1,5 +1,11 @@
 # @mcansh/nightly-release-test-two
 
+## 1.2.4
+
+### Patch Changes
+
+- 16c4c1d: revert
+
 ## 1.2.3
 
 ## 1.2.2
