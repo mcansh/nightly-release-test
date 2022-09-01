@@ -10,7 +10,7 @@ permissions:
 jobs:
   if_merged:
     name: Add label to merged PR
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
     runs-on: ubuntu-latest
     steps:
       - uses: actions-ecosystem/action-add-labels@v1
