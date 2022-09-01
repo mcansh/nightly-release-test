@@ -3,6 +3,8 @@ name: 📦 Merged PR
 on:
   pull_request:
     types: [closed]
+    branches:
+      - dev
 
 permissions:
   pull-requests: write
@@ -10,7 +12,7 @@ permissions:
 jobs:
   if_merged:
     name: Add label to merged PR
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev'
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - uses: actions-ecosystem/action-add-labels@v1
