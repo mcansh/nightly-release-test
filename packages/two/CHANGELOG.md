@@ -1,5 +1,11 @@
 # @mcansh/nightly-release-test-two
 
+## 1.2.5
+
+### Patch Changes
+
+- e0a2896: dumb change to test things
+
 ## 1.2.4
 
 ### Patch Changes
