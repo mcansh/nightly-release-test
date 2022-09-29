@@ -1,5 +1,11 @@
 # @mcansh/nightly-release-test-two
 
+## 1.2.6
+
+### Patch Changes
+
+- 48b3d3e: Update index.ts
+
 ## 1.2.5
 
 ### Patch Changes
