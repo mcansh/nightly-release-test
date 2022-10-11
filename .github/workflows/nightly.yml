@@ -81,7 +81,7 @@ jobs:
 
             git tag ${NEXT_VERSION}
 
-            echo ::set-output name=NEXT_VERSION::${NEXT_VERSION}
+            echo "NEXT_VERSION=${NEXT_VERSION}" >> $GITHUB_OUTPUT
           else
             echo "🛑 no changes since last nightly, skipping..."
           fi
