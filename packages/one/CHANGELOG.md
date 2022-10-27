@@ -1,5 +1,7 @@
 # @mcansh/nightly-release-test-one
 
+## 1.2.7
+
 ## 1.2.6
 
 ## 1.2.5
