@@ -1,5 +1,11 @@
 # @mcansh/nightly-release-test-two
 
+## 1.2.7
+
+### Patch Changes
+
+- f381333: Update index.ts
+
 ## 1.2.6
 
 ### Patch Changes
