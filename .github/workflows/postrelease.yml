@@ -4,7 +4,7 @@ on:
   push:
     tags:
       # only run on `@mcansh/nightly-release-test-two` tags
-      - "nightly-release-test-two@*"
+      - "@mcansh/nightly-release-test-two@*"
 
 jobs:
   comment:
