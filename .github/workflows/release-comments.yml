@@ -16,24 +16,8 @@ jobs:
     if: github.repository == 'mcansh/nightly-release-test'
     runs-on: ubuntu-latest
     steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v3
-
-      - name: ⎔ Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: "npm"
-          registry-url: "https://npm.pkg.github.com"
-          cache-dependency-path: "**/package-lock.json"
-
-      - name: 📥 Install deps
-        run: npm install
-        working-directory: ./scripts/release
-
       - name: 📝 Comment on issues
-        working-directory: ./scripts/release
-        run: node -r esbuild-register ./comment.ts
+        uses: mcansh/release-comment-action@0.0.1
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
