@@ -17,11 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📝 Comment on issues
-        uses: mcansh/release-comment-action@0.0.1
+        uses: mcansh/release-comment-action@0.0.2
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ github.token }}
-          VERSION: ${{ inputs.ref }}
-          DEFAULT_BRANCH: "main"
-          NIGHTLY_BRANCH: "dev"
-          PACKAGE_VERSION_TO_FOLLOW: ${{ inputs.packageVersionToFollow }}
+        with:
+          version: ${{ inputs.ref }}
+          default-branch: "main"
+          nightly-branch: "dev"
+          package-version-to-follow: ${{ inputs.packageVersionToFollow }}
