@@ -26,7 +26,6 @@ function findReleaseFromChangeset(publishedPackages, packageVersionToFollow) {
   }
 
   return `${found.name}@${found.version}`;
-
 }
 
 findReleaseFromChangeset(process.env.publishedPackages, process.env.packageVersionToFollow);

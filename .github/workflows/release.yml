@@ -83,7 +83,7 @@ jobs:
       - id: findPackage
         run: |
           package=$(node ./scripts/release/find-release-from-changeset.js)
-          echo "package=$package" >> $GITHUB_OUTPUT
+          echo "package=${package}" >> $GITHUB_OUTPUT
         env:
           packageVersionToFollow: "@mcansh/nightly-release-test-two"
           publishedPackages: ${{ needs.release.outputs.publishedPackages }}
