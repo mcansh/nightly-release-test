@@ -3,4 +3,4 @@
 "@mcansh/nightly-release-test-two": patch
 ---
 
-chore: change
+Revert "chore: change"
