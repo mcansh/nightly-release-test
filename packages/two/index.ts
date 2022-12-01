@@ -1,1 +1,1 @@
-console.info("@mcansh/nightly-release-test-two");
+console.log("@mcansh/nightly-release-test-two");
