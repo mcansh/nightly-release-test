@@ -1,5 +1,11 @@
 # @mcansh/nightly-release-test-one
 
+## 1.2.8
+
+### Patch Changes
+
+- 4c5d88f: Revert "chore: change"
+
 ## 1.2.7
 
 ## 1.2.6
