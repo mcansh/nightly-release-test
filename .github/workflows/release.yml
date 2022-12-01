@@ -20,6 +20,8 @@ jobs:
       github.repository == 'mcansh/nightly-release-test' &&
       !contains(github.ref, 'nightly')
     runs-on: ubuntu-latest
+    outputs:
+      publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
     steps:
       - name: 🛑 Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -58,3 +60,40 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.NIGHTLY_PAT }}
           NPM_TOKEN: ${{ secrets.NIGHTLY_PAT }}
           NODE_AUTH_TOKEN: ${{ secrets.NIGHTLY_PAT }}
+
+  findPackage:
+    name: 🦋 Find Package
+    needs: [release]
+    runs-on: ubuntu-latest
+    outputs:
+      package: ${{ steps.findPackage.outputs.package }}
+    steps:
+      - name: 🛑 Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: "npm"
+
+      - id: findPackage
+        run: |
+          package=$(node ./scripts/release/find-release-from-changeset.js)
+          echo "package=$package" >> $GITHUB_OUTPUT
+        env:
+          packageVersionToFollow: "@mcansh/nightly-release-test-two"
+          publishedPackages: ${{ needs.release.outputs.publishedPackages }}
+
+
+  comment:
+    name: 📝 Comment on related issues and pull requests
+    if: github.repository == 'mcansh/nightly-release-test'
+    needs: [release, findPackage]
+    uses: ./.github/workflows/release-comments.yml
+    with:
+      ref: ${{ needs.findPackage.outputs.package }}
+      packageVersionToFollow: "@mcansh/nightly-release-test-two"
