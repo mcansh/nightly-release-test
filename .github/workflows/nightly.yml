@@ -56,8 +56,7 @@ jobs:
           LATEST_NIGHTLY_TAG=$(git tag -l v0.0.0-nightly-\* --sort=-committerdate | head -n 1)
 
           # get changes since last nightly
-          CHANGES=true
-          # $(git diff --name-only $LATEST_NIGHTLY_TAG..dev -- ./packages/ -- ':!packages/**/package.json')
+          CHANGES=$(git diff --name-only $LATEST_NIGHTLY_TAG..dev -- ./packages/ -- ':!packages/**/package.json')
 
           # check if there are changes to ./packages
           if [[ -n $CHANGES ]]; then
