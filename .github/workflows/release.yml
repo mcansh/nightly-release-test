@@ -90,7 +90,6 @@ jobs:
           packageVersionToFollow: "@mcansh/nightly-release-test-two"
           publishedPackages: ${{ needs.release.outputs.publishedPackages }}
 
-
   comment:
     name: 📝 Comment on related issues and pull requests
     if: github.repository == 'mcansh/nightly-release-test' && needs.findPackage.outputs.package != ''
