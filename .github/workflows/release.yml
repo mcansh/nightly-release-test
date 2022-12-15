@@ -77,7 +77,7 @@ jobs:
   comment:
     needs: [release]
     name: 📝 Comment on related issues and pull requests
-    if: github.repository == 'mcansh/nightly-release-test' && needs.release.outputs.published
+    if: github.repository == 'mcansh/nightly-release-test' && needs.release.outputs.published == 'true'
     uses: ./.github/workflows/release-comments.yml
     with:
       ref: refs/tags/v${{ needs.release.outputs.remixVersion }}
