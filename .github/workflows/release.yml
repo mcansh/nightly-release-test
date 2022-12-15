@@ -20,7 +20,7 @@ jobs:
     # and a `repository_dispatch` trigger, actions still aren't ran if a version
     # is published using the default secrets.GITHUB_TOKEN.
     if: |
-      github.repository == "mcansh/nightly-release-test" &&
+      github.repository == 'mcansh/nightly-release-test' &&
       !contains(github.ref, 'nightly')
     runs-on: ubuntu-latest
     outputs:
@@ -68,7 +68,7 @@ jobs:
     name: 🦋 Find Package
     needs: [release]
     runs-on: ubuntu-latest
-    if: github.repository == "mcansh/nightly-release-test" && needs.release.outputs.published == true
+    if: github.repository == 'mcansh/nightly-release-test' && needs.release.outputs.published == true
     outputs:
       package: ${{ steps.findPackage.outputs.package }}
     steps:
@@ -94,7 +94,7 @@ jobs:
 
   comment:
     name: 📝 Comment on related issues and pull requests
-    if: github.repository == "mcansh/nightly-release-test" && needs.findPackage.outputs.package != ''
+    if: github.repository == 'mcansh/nightly-release-test' && needs.findPackage.outputs.package != ''
     needs: [release, findPackage]
     uses: ./.github/workflows/release-comments.yml
     with:
