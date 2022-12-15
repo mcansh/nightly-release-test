@@ -1,5 +1,11 @@
 # @mcansh/nightly-release-test-two
 
+## 1.2.13
+
+### Patch Changes
+
+- 9c00481: chore: throw error
+
 ## 1.2.12
 
 ### Patch Changes
