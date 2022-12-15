@@ -1,5 +1,11 @@
 # @mcansh/nightly-release-test-two
 
+## 1.2.15
+
+### Patch Changes
+
+- 0393b15: change
+
 ## 1.2.14
 
 ### Patch Changes
