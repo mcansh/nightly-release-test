@@ -1,5 +1,11 @@
 # @mcansh/nightly-release-test-two
 
+## 1.2.10
+
+### Patch Changes
+
+- 28e3554: Revert "stable change"
+
 ## 1.2.9
 
 ### Patch Changes
