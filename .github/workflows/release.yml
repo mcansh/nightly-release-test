@@ -9,6 +9,10 @@ on:
       - "!release-manual"
       - "!release-manual-*"
 
+env:
+  packageVersionToFollow: "@mcansh/nightly-release-test-two"
+  repo: "mcansh/nightly-release-test"
+
 jobs:
   release:
     name: 🦋 Changesets Release
@@ -17,7 +21,7 @@ jobs:
     # and a `repository_dispatch` trigger, actions still aren't ran if a version
     # is published using the default secrets.GITHUB_TOKEN.
     if: |
-      github.repository == 'mcansh/nightly-release-test' &&
+      github.repository == $repo &&
       !contains(github.ref, 'nightly')
     runs-on: ubuntu-latest
     outputs:
@@ -60,13 +64,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.NIGHTLY_PAT }}
           NPM_TOKEN: ${{ secrets.NIGHTLY_PAT }}
-          NODE_AUTH_TOKEN: ${{ secrets.NIGHTLY_PAT }}
 
   findPackage:
     name: 🦋 Find Package
     needs: [release]
     runs-on: ubuntu-latest
-    if: needs.release.outputs.published == true
+    if: github.repository == $repo && needs.release.outputs.published == true
     outputs:
       package: ${{ steps.findPackage.outputs.package }}
     steps:
@@ -87,14 +90,14 @@ jobs:
           package=$(node ./scripts/release/find-release-from-changeset.js)
           echo "package=${package}" >> $GITHUB_OUTPUT
         env:
-          packageVersionToFollow: "@mcansh/nightly-release-test-two"
+          packageVersionToFollow: $packageVersionToFollow
           publishedPackages: ${{ needs.release.outputs.publishedPackages }}
 
   comment:
     name: 📝 Comment on related issues and pull requests
-    if: github.repository == 'mcansh/nightly-release-test' && needs.findPackage.outputs.package != ''
+    if: github.repository == $repo && needs.findPackage.outputs.package != ''
     needs: [release, findPackage]
     uses: ./.github/workflows/release-comments.yml
     with:
-      ref: ${{ needs.findPackage.outputs.package }}
-      packageVersionToFollow: "@mcansh/nightly-release-test-two"
+      ref: refs/tags/${{ needs.findPackage.outputs.package }}
+      packageVersionToFollow: $packageVersionToFollow
