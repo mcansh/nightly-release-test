@@ -1,5 +1,19 @@
 # @mcansh/nightly-release-test-two
 
+## 1.2.10
+
+### Patch Changes
+
+- 28e3554: Revert "stable change"
+
+## 1.2.9
+
+### Patch Changes
+
+- e973b84: stable change
+- f2f8491: Revert "Revert "chore: change""
+- 211d3f6: move shit to src dir
+
 ## 1.2.8
 
 ### Patch Changes
