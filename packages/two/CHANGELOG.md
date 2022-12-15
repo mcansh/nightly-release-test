@@ -1,5 +1,11 @@
 # @mcansh/nightly-release-test-two
 
+## 1.2.14
+
+### Patch Changes
+
+- c898c6a: chore: echo package
+
 ## 1.2.13
 
 ### Patch Changes
