@@ -63,6 +63,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.NIGHTLY_PAT }}
           NPM_TOKEN: ${{ secrets.NIGHTLY_PAT }}
+          NODE_AUTH_TOKEN: ${{ secrets.NIGHTLY_PAT }}
 
   findPackage:
     name: 🦋 Find Package
