@@ -1,5 +1,12 @@
 # @mcansh/nightly-release-test-one
 
+## 1.2.11
+
+### Patch Changes
+
+- 15f72a7: Revert "Revert "chore: change""
+- 15f72a7: move shit to src dir
+
 ## 1.2.10
 
 ## 1.2.9
