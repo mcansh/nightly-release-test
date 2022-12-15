@@ -71,6 +71,7 @@ jobs:
           # find the remix package in the publishedPackages array from changesets
           # example output [{"name": "@xx/xx", "version": "1.2.0"}, {"name": "@xx/xy", "version": "0.8.9"}]
           remixVersion=$(echo ${{ steps.changesets.outputs.publishedPackages }} | jq --arg packageVersionToFollow "$packageVersionToFollow" '.[] | select(.name == $packageVersionToFollow) | .version')
+          echo "$packageVersionToFollow: $version"
           echo "remixVersion=${version}" >> $GITHUB_OUTPUT
 
   comment:
