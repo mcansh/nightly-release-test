@@ -90,7 +90,7 @@ jobs:
           package=$(node ./scripts/release/find-release-from-changeset.js)
           echo "package=${package}" >> $GITHUB_OUTPUT
         env:
-          packageVersionToFollow: $packageVersionToFollow
+          packageVersionToFollow: ${{ env.packageVersionToFollow }}
           publishedPackages: ${{ needs.release.outputs.publishedPackages }}
 
   comment:
@@ -100,4 +100,4 @@ jobs:
     uses: ./.github/workflows/release-comments.yml
     with:
       ref: refs/tags/${{ needs.findPackage.outputs.package }}
-      packageVersionToFollow: $packageVersionToFollow
+      packageVersionToFollow: ${{ env.packageVersionToFollow }}
