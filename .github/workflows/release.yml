@@ -69,7 +69,7 @@ jobs:
     name: 🦋 Find Package
     needs: [release]
     runs-on: ubuntu-latest
-    if: github.repository == 'mcansh/nightly-release-test' && needs.release.outputs.published == true
+    if: github.repository == 'mcansh/nightly-release-test' && needs.release.outputs.published == 'true'
     outputs:
       package: ${{ steps.findPackage.outputs.package }}
     steps:
