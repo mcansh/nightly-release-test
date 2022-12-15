@@ -1,3 +1,3 @@
 export function two() {
-  throw new Error("@mcansh/nightly-release-test-two");
+  console.info("@mcansh/nightly-release-test-two");
 }
