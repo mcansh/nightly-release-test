@@ -1,5 +1,11 @@
 # @mcansh/nightly-release-test-two
 
+## 1.2.12
+
+### Patch Changes
+
+- 937cd31: change
+
 ## 1.2.11
 
 ### Patch Changes
