@@ -9,9 +9,6 @@ on:
       - "!release-manual"
       - "!release-manual-*"
 
-env:
-  packageVersionToFollow: "@mcansh/nightly-release-test-two"
-
 jobs:
   release:
     name: 🦋 Changesets Release
@@ -24,8 +21,8 @@ jobs:
       !contains(github.ref, 'nightly')
     runs-on: ubuntu-latest
     outputs:
+      publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
       published: ${{ steps.changesets.outputs.published }}
-      remixVersion: ${{ steps.get_remix_version.outputs.version }}
     steps:
       - name: 🛑 Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -65,20 +62,39 @@ jobs:
           NPM_TOKEN: ${{ secrets.NIGHTLY_PAT }}
           NODE_AUTH_TOKEN: ${{ secrets.NIGHTLY_PAT }}
 
-      - name: 🕵️ Get remix package version
-        id: get_remix_version
+  findPackage:
+    name: 🦋 Find Package
+    needs: [release]
+    runs-on: ubuntu-latest
+    if: needs.release.outputs.published == true
+    outputs:
+      package: ${{ steps.findPackage.outputs.package }}
+    steps:
+      - name: 🛑 Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: "npm"
+
+      - id: findPackage
         run: |
-          # find the remix package in the publishedPackages array from changesets
-          # example output [{"name": "@xx/xx", "version": "1.2.0"}, {"name": "@xx/xy", "version": "0.8.9"}]
-          remixVersion=$(echo ${{ steps.changesets.outputs.publishedPackages }} | jq --arg packageVersionToFollow "$packageVersionToFollow" '.[] | select(.name == $packageVersionToFollow) | .version')
-          echo "$packageVersionToFollow: $remixVersion"
-          echo "remixVersion=${remixVersion}" >> $GITHUB_OUTPUT
+          package=$(node ./scripts/release/find-release-from-changeset.js)
+          echo "package=${package}" >> $GITHUB_OUTPUT
+        env:
+          packageVersionToFollow: "@mcansh/nightly-release-test-two"
+          publishedPackages: ${{ needs.release.outputs.publishedPackages }}
 
   comment:
-    needs: [release]
     name: 📝 Comment on related issues and pull requests
-    if: github.repository == 'mcansh/nightly-release-test' && needs.release.outputs.published == 'true'
+    if: github.repository == 'mcansh/nightly-release-test' && needs.findPackage.outputs.package != ''
+    needs: [release, findPackage]
     uses: ./.github/workflows/release-comments.yml
     with:
-      ref: refs/tags/v${{ needs.release.outputs.remixVersion }}
-      packageVersionToFollow: $packageVersionToFollow
+      ref: ${{ needs.findPackage.outputs.package }}
+      packageVersionToFollow: "@mcansh/nightly-release-test-two"
