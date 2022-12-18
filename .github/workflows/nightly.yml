@@ -81,8 +81,6 @@ jobs:
           git config --local user.name "Remix Run Bot"
           git checkout -b nightly/${{steps.version.outputs.NEXT_VERSION}}
           npm version -ws ${NEXT_VERSION}
-          git add .
-          git commit -m "🌒 Nightly Release ${NEXT_VERSION}"
 
       - name: 🏷 Push Tag
         if: steps.version.outputs.NEXT_VERSION
