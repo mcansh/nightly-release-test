@@ -70,10 +70,6 @@ jobs:
             echo "🛑 no changes since last nightly, skipping..."
           fi
 
-      - name: 🏗 Build
-        if: steps.version.outputs.NEXT_VERSION
-        run: npm run build
-
       - name: ⤴️ Update version
         if: steps.version.outputs.NEXT_VERSION
         run: |
@@ -82,6 +78,10 @@ jobs:
           git checkout -b nightly/${{steps.version.outputs.NEXT_VERSION}}
           npm version -ws ${NEXT_VERSION}
 
+      - name: 🏗 Build
+        if: steps.version.outputs.NEXT_VERSION
+        run: npm run build
+     
       - name: 🏷 Push Tag
         if: steps.version.outputs.NEXT_VERSION
         run: git push origin --tags
