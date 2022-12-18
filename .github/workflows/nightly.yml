@@ -75,8 +75,8 @@ jobs:
         run: |
           git config --local user.email "hello@remix.run"
           git config --local user.name "Remix Run Bot"
-          git checkout -b nightly/${{steps.version.outputs.NEXT_VERSION}}
-          npm version -ws ${NEXT_VERSION}
+          git checkout -b nightly/${{ steps.version.outputs.NEXT_VERSION }}
+          npm version -ws ${{ steps.version.outputs.NEXT_VERSION }}
 
       - name: 🏗 Build
         if: steps.version.outputs.NEXT_VERSION
