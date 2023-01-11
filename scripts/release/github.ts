@@ -8,9 +8,10 @@ import {
   PACKAGE_VERSION_TO_FOLLOW,
   AWAITING_RELEASE_LABEL,
   IS_NIGHTLY_RELEASE,
+  IS_STABLE_RELEASE,
 } from "./constants";
 import { gql, graphqlWithAuth, octokit } from "./octokit";
-import { isNightly, MinimalTag } from "./utils";
+import { isNightly, isStable, MinimalTag } from "./utils";
 import { cleanupTagName } from "./utils";
 import { checkIfStringStartsWith } from "./utils";
 
@@ -143,6 +144,7 @@ function getPreviousTagFromCurrentTag(
     })
     .filter((v: any): v is MinimalTag => typeof v !== "undefined")
     .filter((tag) => {
+      if (IS_STABLE_RELEASE) return isStable(tag.tag);
       let isNightlyTag = isNightly(tag.tag);
       if (IS_NIGHTLY_RELEASE) return isNightlyTag;
       return !isNightlyTag;
