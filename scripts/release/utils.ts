@@ -1,3 +1,4 @@
+import * as semver from "semver";
 import { GITHUB_REPOSITORY, PACKAGE_VERSION_TO_FOLLOW } from "./constants";
 
 export function checkIfStringStartsWith(
@@ -33,4 +34,8 @@ export function cleanupRef(ref: string) {
 
 export function isNightly(tagName: string) {
   return tagName.startsWith("v0.0.0-nightly-");
+}
+
+export function isStable(tagName: string) {
+  return semver.prerelease(tagName) === null;
 }
