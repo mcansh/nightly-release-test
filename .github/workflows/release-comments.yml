@@ -6,7 +6,10 @@ on:
       ref:
         required: true
         type: string
-      packageVersionToFollow:
+      package_version_to_follow:
+        required: true
+        type: string
+      release_branch:
         required: true
         type: string
 
@@ -28,7 +31,7 @@ jobs:
           cache-dependency-path: "**/package-lock.json"
 
       - name: 📥 Install deps
-        run: npm install
+        run: npm ci
         working-directory: ./scripts/release
 
       - name: 📝 Comment on issues
@@ -39,5 +42,5 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.ref }}
           DEFAULT_BRANCH: "main"
-          NIGHTLY_BRANCH: "dev"
-          PACKAGE_VERSION_TO_FOLLOW: ${{ inputs.packageVersionToFollow }}
+          RELEASE_BRANCH: ${{ inputs.release_branch }}
+          PACKAGE_VERSION_TO_FOLLOW: ${{ inputs.package_version_to_follow }}

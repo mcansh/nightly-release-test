@@ -21,7 +21,7 @@ jobs:
       !contains(github.ref, 'nightly')
     runs-on: ubuntu-latest
     outputs:
-      publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
+      published_packages: ${{ steps.changesets.outputs.published_packages }}
       published: ${{ steps.changesets.outputs.published }}
     steps:
       - name: 🛑 Cancel Previous Runs
@@ -62,13 +62,13 @@ jobs:
           NPM_TOKEN: ${{ secrets.NIGHTLY_PAT }}
           NODE_AUTH_TOKEN: ${{ secrets.NIGHTLY_PAT }}
 
-  findPackageVersion:
+  find_package_version:
     name: 🦋 Find Package
     needs: [release]
     runs-on: ubuntu-latest
     if: github.repository == 'mcansh/nightly-release-test' && needs.release.outputs.published == 'true'
     outputs:
-      packageVersion: ${{ steps.findPackageVersion.outputs.packageVersion }}
+      package_version: ${{ steps.find_package_version.outputs.package_version }}
     steps:
       - name: 🛑 Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -82,19 +82,20 @@ jobs:
           node-version: 16
           cache: "npm"
 
-      - id: findPackageVersion
+      - id: find_package_version
         run: |
-          packageVersion=$(node ./scripts/release/find-release-from-changeset.js)
-          echo "packageVersion=${packageVersion}" >> $GITHUB_OUTPUT
+          package_version=$(node ./scripts/release/find-release-from-changeset.js)
+          echo "package_version=${package_version}" >> $GITHUB_OUTPUT
         env:
-          packageVersionToFollow: "@mcansh/nightly-release-test-two"
-          publishedPackages: ${{ needs.release.outputs.publishedPackages }}
+          package_version_to_follow: "@mcansh/nightly-release-test-two"
+          published_packages: ${{ needs.release.outputs.published_packages }}
 
   comment:
     name: 📝 Comment on related issues and pull requests
-    if: github.repository == 'mcansh/nightly-release-test' && needs.findPackageVersion.outputs.packageVersion != ''
-    needs: [release, findPackageVersion]
+    if: github.repository == 'mcansh/nightly-release-test' && needs.find_package_version.outputs.packageVersion != ''
+    needs: [release, find_package_version]
     uses: ./.github/workflows/release-comments.yml
     with:
-      ref: refs/tags/@mcansh/nightly-release-test-two@${{ needs.findPackageVersion.outputs.packageVersion }}
-      packageVersionToFollow: "@mcansh/nightly-release-test-two"
+      ref: refs/tags/@mcansh/nightly-release-test-two@${{ needs.find_package_version.outputs.packageVersion }}
+      package_version_to_follow: "@mcansh/nightly-release-test-two"
+      release_branch: ${{ github.ref_name }}
