@@ -11,10 +11,9 @@ jobs:
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v3
-        with:
-          ref: dev
-          token: ${{ secrets.NIGHTLY_PAT }}
-          fetch-depth: 0
+
+      - name: 🏷️ Fetch git tags
+        run: git fetch --tags origin
 
       - name: 🟧 Setup pnpm
         uses: pnpm/action-setup@v2
