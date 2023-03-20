@@ -17,11 +17,6 @@ if (!PACKAGE_VERSION_TO_FOLLOW) {
   process.exit(1);
 }
 
-if (!DRY_RUN) {
-  console.log("NOT DRY RUN\n\n", "you have 5 seconds to cancel");
-  await new Promise((resolve) => setTimeout(resolve, 5_000));
-}
-
 let tagCommand = [
   "tag",
   "-l",
