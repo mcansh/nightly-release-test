@@ -2,16 +2,6 @@ name: 📝 Comment on Release
 
 on:
   workflow_call:
-    inputs:
-      ref:
-        required: true
-        type: string
-      package_version_to_follow:
-        required: true
-        type: string
-      release_branch:
-        required: true
-        type: string
 
 jobs:
   comment:
@@ -32,15 +22,8 @@ jobs:
 
       - name: 📥 Install deps
         run: npm ci
-        working-directory: ./scripts/release
 
       - name: 📝 Comment on issues
-        working-directory: ./scripts/release
-        run: node -r esbuild-register ./comment.ts
+        run: node ./scripts/comment.mjs
         env:
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_TOKEN: ${{ github.token }}
-          VERSION: ${{ inputs.ref }}
-          DEFAULT_BRANCH: "main"
-          RELEASE_BRANCH: ${{ inputs.release_branch }}
-          PACKAGE_VERSION_TO_FOLLOW: ${{ inputs.package_version_to_follow }}
+          PACKAGE_VERSION_TO_FOLLOW: "@mcansh/nightly-release-test-two"

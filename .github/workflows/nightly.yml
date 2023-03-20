@@ -97,7 +97,3 @@ jobs:
     name: 📝 Comment on related issues and pull requests
     if: github.repository == 'mcansh/nightly-release-test' && needs.nightly.outputs.NEXT_VERSION
     uses: ./.github/workflows/release-comments.yml
-    with:
-      ref: "refs/tags/v${{ needs.nightly.outputs.NEXT_VERSION }}"
-      package_version_to_follow: "@mcansh/nightly-release-test-two"
-      release_branch: "dev"

@@ -82,20 +82,8 @@ jobs:
           node-version: 16
           cache: "npm"
 
-      - id: find_package_version
-        run: |
-          package_version=$(node ./scripts/release/find-release-from-changeset.js)
-          echo "package_version=${package_version}" >> $GITHUB_OUTPUT
-        env:
-          PACKAGE_VERSION_TO_FOLLOW: "@mcansh/nightly-release-test-two"
-          PUBLISHED_PACKAGES: ${{ needs.release.outputs.published_packages }}
-
   comment:
     name: 📝 Comment on related issues and pull requests
     if: github.repository == 'mcansh/nightly-release-test' && needs.find_package_version.outputs.packageVersion != ''
     needs: [release, find_package_version]
     uses: ./.github/workflows/release-comments.yml
-    with:
-      ref: refs/tags/@mcansh/nightly-release-test-two@${{ needs.find_package_version.outputs.packageVersion }}
-      package_version_to_follow: "@mcansh/nightly-release-test-two"
-      release_branch: ${{ github.ref_name }}
