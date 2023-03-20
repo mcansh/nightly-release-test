@@ -30,16 +30,16 @@ importers:
       semver: 7.3.8
       typescript: 5.0.2
 
-  packages/one:
-    specifiers: {}
-
-  packages/three:
+  packages/_main:
     specifiers:
       '@mcansh/nightly-release-test-one': 1.2.16
       '@mcansh/nightly-release-test-two': 1.2.16
     dependencies:
       '@mcansh/nightly-release-test-one': link:../one
       '@mcansh/nightly-release-test-two': link:../two
+
+  packages/one:
+    specifiers: {}
 
   packages/two:
     specifiers: {}
