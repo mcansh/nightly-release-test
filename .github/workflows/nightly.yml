@@ -102,3 +102,4 @@ jobs:
     name: 📝 Comment on issues and pull requests
     if: github.repository == 'mcansh/nightly-release-test' && needs.nightly.outputs.NEXT_VERSION
     uses: ./.github/workflows/release-comments.yml
+    secrets: inherit
