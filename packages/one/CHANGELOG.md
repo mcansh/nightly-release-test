@@ -1,5 +1,11 @@
 # @mcansh/nightly-release-test-one
 
+## 1.2.16
+
+### Patch Changes
+
+- b73e043: feat: declarationMap
+
 ## 1.2.15
 
 ## 1.2.14
