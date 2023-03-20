@@ -62,28 +62,8 @@ jobs:
           NPM_TOKEN: ${{ secrets.NIGHTLY_PAT }}
           NODE_AUTH_TOKEN: ${{ secrets.NIGHTLY_PAT }}
 
-  find_package_version:
-    name: 🦋 Find Package
-    needs: [release]
-    runs-on: ubuntu-latest
-    if: github.repository == 'mcansh/nightly-release-test' && needs.release.outputs.published == 'true'
-    outputs:
-      package_version: ${{ steps.find_package_version.outputs.package_version }}
-    steps:
-      - name: 🛑 Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
-
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v3
-
-      - name: ⎔ Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: "npm"
-
   comment:
     name: 📝 Comment on related issues and pull requests
-    if: github.repository == 'mcansh/nightly-release-test' && needs.find_package_version.outputs.packageVersion != ''
-    needs: [release, find_package_version]
+    needs: [release]
+    if: github.repository == 'mcansh/nightly-release-test' && needs.release.outputs.published == 'true'
     uses: ./.github/workflows/release-comments.yml

@@ -100,7 +100,7 @@ if (gitCommitsResult.stderr) {
 
 let gitCommits = gitCommitsResult.stdout.split("\n");
 
-log({ commitCount: gitCommits.length });
+log({ gitCommits, commitCount: gitCommits.length });
 
 /**
  * @param {string} sha
@@ -120,7 +120,7 @@ function getPrListCommand(sha) {
 }
 
 let prs = await findMergedPRs(gitCommits);
-log(prs);
+log(`found ${prs.length} merged PRs that changed ./packages/*`);
 
 for (let pr of prs) {
   let prComment = `🤖 Hello there,\n\nWe just published version \`${latest.clean}\` which includes this pull request. If you'd like to take it for a test run please try it out and let us know what you think!\n\nThanks!`;
