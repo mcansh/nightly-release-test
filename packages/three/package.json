@@ -1,0 +1,25 @@
+{
+  "name": "@mcansh/nightly-release-test",
+  "version": "1.2.16",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "mcansh/nightly-release-test",
+    "directory": "packages/three"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@mcansh/nightly-release-test-one": "1.2.16",
+    "@mcansh/nightly-release-test-two": "1.2.16"
+  }
+}

@@ -3,7 +3,11 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [
-    ["@mcansh/nightly-release-test-one", "@mcansh/nightly-release-test-two"]
+    [
+      "@mcansh/nightly-release-test",
+      "@mcansh/nightly-release-test-one",
+      "@mcansh/nightly-release-test-two"
+    ]
   ],
   "linked": [],
   "access": "restricted",
