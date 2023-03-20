@@ -51,8 +51,8 @@ async function run(args) {
   await incrementVersion(nextVersion);
 
   // Commit and tag
-  // execSync(`git commit --all --message="Version ${nextVersion}"`);
-  // execSync(`git tag -a -m "Version ${nextVersion}" v${nextVersion}`);
+  execSync(`git commit --all --message="Version ${nextVersion}"`);
+  execSync(`git tag -a -m "Version ${nextVersion}" v${nextVersion}`);
   console.log(`✅ Committed and tagged version ${nextVersion}`);
 }
 
