@@ -25,12 +25,10 @@ if (!GITHUB_REPOSITORY) {
 }
 
 function log(...args) {
-  if (DEBUG) {
-    console.log(...args);
-  }
+  if (DEBUG) console.log(...args);
 }
 
-let tagCommand = [
+let gitTagsResult = await execa("git", [
   "tag",
   "-l",
   `${PACKAGE_VERSION_TO_FOLLOW}@*`,
@@ -39,9 +37,7 @@ let tagCommand = [
   "-creatordate",
   "--format",
   "%(refname:strip=2)",
-];
-
-let gitTagsResult = await execa("git", tagCommand);
+]);
 
 if (gitTagsResult.stderr) {
   console.error(gitTagsResult.stderr);
@@ -80,19 +76,12 @@ if (isPreRelease) {
 
 log({ latest, previous, isPreRelease, isStable, isNightly });
 
-/**
- * @param {string} start
- * @param {string} end
- * @returns {string[]} command to use with execa
- */
-function getCommitsCommand(start, end) {
-  return ["log", "--pretty=format:%H", `${start}...${end}`, "./packages"];
-}
-
-let gitCommitsResult = await execa(
-  "git",
-  getCommitsCommand(previous.tag, latest.tag)
-);
+let gitCommitsResult = await execa("git", [
+  "log",
+  "--pretty=format:%H",
+  `${previous.tag}...${latest.tag}`,
+  "./packages",
+]);
 
 if (gitCommitsResult.stderr) {
   console.error(gitCommitsResult.stderr);
@@ -102,23 +91,6 @@ if (gitCommitsResult.stderr) {
 let gitCommits = gitCommitsResult.stdout.split("\n");
 
 log({ gitCommits, commitCount: gitCommits.length });
-
-/**
- * @param {string} sha
- * @returns {string[]} command to use with execa
- */
-function getPrListCommand(sha) {
-  return [
-    "pr",
-    "list",
-    "--search",
-    sha,
-    "--state",
-    "merged",
-    "--json",
-    "number,title,url,body",
-  ];
-}
 
 let prs = await findMergedPRs(gitCommits);
 log(`found ${prs.length} merged PRs that changed ./packages/*`);
@@ -131,28 +103,24 @@ for (let pr of prs) {
 
   if (!DRY_RUN) {
     console.log(`https://github.com/${GITHUB_REPOSITORY}/pull/${pr.number}`);
-    let commentCommand = ["pr", "comment", pr.number, "--body", prComment];
-    let commentResult = promises.push(execa("gh", commentCommand));
+    let commentResult = promises.push(
+      execa("gh", ["pr", "comment", pr.number, "--body", prComment])
+    );
     if (commentResult.stderr) {
       console.error(commentResult.stderr);
     }
 
     for (let issue of pr.issues) {
       console.log(`https://github.com/${GITHUB_REPOSITORY}/issues/${issue}`);
-      let issueCommentCommand = [
-        "issue",
-        "comment",
-        issue,
-        "--body",
-        issueComment,
-      ];
-      let issueCommentResult = promises.push(execa("gh", issueCommentCommand));
+
+      let issueCommentResult = promises.push(
+        execa("gh", ["issue", "comment", issue, "--body", issueComment])
+      );
       if (issueCommentResult.stderr) {
         console.error(issueCommentResult.stderr);
       }
 
-      let closeCommand = ["issue", "close", issue];
-      let closeResult = promises.push(execa("gh", closeCommand));
+      let closeResult = promises.push(execa("gh", ["issue", "close", issue]));
       if (closeResult.stderr) {
         console.error(closeResult.stderr);
       }
@@ -258,9 +226,16 @@ async function findMergedPRs(commits) {
   ];
   let result = await Promise.all(
     commits.map(async (commit) => {
-      let prCommand = getPrListCommand(commit);
-
-      let prResult = await execa("gh", prCommand);
+      let prResult = await execa("gh", [
+        "pr",
+        "list",
+        "--search",
+        commit,
+        "--state",
+        "merged",
+        "--json",
+        "number,title,url,body",
+      ]);
       if (prResult.stderr) {
         console.error(prResult.stderr);
         throw new Error(prResult.stderr);
