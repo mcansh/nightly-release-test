@@ -36,3 +36,4 @@ jobs:
         env:
           PACKAGE_VERSION_TO_FOLLOW: "@mcansh/nightly-release-test-two"
           GITHUB_REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
