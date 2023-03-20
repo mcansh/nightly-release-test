@@ -1,6 +1,6 @@
 {
   "name": "@mcansh/nightly-release-test",
-  "version": "1.2.16",
+  "version": "0.0.0-nightly-66d3cc7-20230320",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@mcansh/nightly-release-test-one": "1.2.16",
-    "@mcansh/nightly-release-test-two": "1.2.16"
+    "@mcansh/nightly-release-test-one": "0.0.0-nightly-66d3cc7-20230320",
+    "@mcansh/nightly-release-test-two": "0.0.0-nightly-66d3cc7-20230320"
   }
 }
