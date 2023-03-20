@@ -38,7 +38,7 @@ async function run(args) {
   let givenVersion = args[0];
   let prereleaseId = args[1];
 
-  ensureCleanWorkingDirectory();
+  // ensureCleanWorkingDirectory();
 
   // Get the next version number
   let pkgJson = await PackageJson.load(path.join(packagesDir, "three"));
@@ -51,8 +51,8 @@ async function run(args) {
   await incrementVersion(nextVersion);
 
   // Commit and tag
-  execSync(`git commit --all --message="Version ${nextVersion}"`);
-  execSync(`git tag -a -m "Version ${nextVersion}" v${nextVersion}`);
+  // execSync(`git commit --all --message="Version ${nextVersion}"`);
+  // execSync(`git tag -a -m "Version ${nextVersion}" v${nextVersion}`);
   console.log(`✅ Committed and tagged version ${nextVersion}`);
 }
 
@@ -61,12 +61,11 @@ function getMonoRepoPackages(pkgJson, nextVersion) {
   let devDependencies = Object.keys(pkgJson.content.devDependencies || {});
   let peerDependencies = Object.keys(pkgJson.content.peerDependencies || {});
   let filter = (name) => name.startsWith("@mcansh/nightly-release-test-");
-  let reduce = (acc, name) => ({ ...acc, [name]: nextVersion });
 
   return {
-    dependencies: dependencies.filter(filter).reduce(reduce, {}),
-    devDependencies: devDependencies.filter(filter).reduce(reduce, {}),
-    peerDependencies: peerDependencies.filter(filter).reduce(reduce, {}),
+    dependencies: dependencies.filter(filter),
+    devDependencies: devDependencies.filter(filter),
+    peerDependencies: peerDependencies.filter(filter),
   };
 }
 /**
@@ -80,9 +79,18 @@ async function incrementVersion(nextVersion) {
 
     pkgJson.update({
       version: nextVersion,
-      dependencies: dependencies.dependencies,
-      devDependencies: dependencies.devDependencies,
-      peerDependencies: dependencies.peerDependencies,
+      dependencies: dependencies.dependencies.reduce(
+        (acc, name) => ({ ...acc, [name]: nextVersion }),
+        {}
+      ),
+      devDependencies: dependencies.devDependencies.reduce(
+        (acc, name) => ({ ...acc, [name]: nextVersion }),
+        {}
+      ),
+      peerDependencies: dependencies.peerDependencies.reduce(
+        (acc, name) => ({ ...acc, [name]: nextVersion }),
+        {}
+      ),
     });
     await pkgJson.save();
   }
