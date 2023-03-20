@@ -162,6 +162,7 @@ for (let pr of prs) {
   let failures = results.filter((result) => result.status === "rejected");
   if (failures.length > 0) {
     console.error(`the following commands failed:`, failures);
+    process.exit(1);
   }
 }
 
