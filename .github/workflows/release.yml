@@ -33,15 +33,20 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.NIGHTLY_PAT }}
 
+      - name: 🟧 Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 7
+
       - name: ⎔ Setup node
         uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: "npm"
+          cache: pnpm
           registry-url: "https://npm.pkg.github.com"
 
       - name: 📥 Install deps
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
         # This action has two responsibilities. The first time the workflow runs
         # (initial push to a `release-*` branch) it will create a new branch and

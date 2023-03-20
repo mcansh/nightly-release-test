@@ -34,15 +34,20 @@ jobs:
           token: ${{ secrets.NIGHTLY_PAT }}
           fetch-depth: 0
 
+      - name: 🟧 Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 7
+
       - name: ⎔ Setup node
         uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: "npm"
+          cache: pnpm
           registry-url: "https://npm.pkg.github.com"
 
       - name: 📥 Install deps
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: 🕵️ Check for changes
         id: version
