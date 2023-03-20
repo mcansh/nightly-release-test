@@ -41,7 +41,7 @@ async function run(args) {
   // ensureCleanWorkingDirectory();
 
   // Get the next version number
-  let pkgJson = await PackageJson.load(path.join(packagesDir, "three"));
+  let pkgJson = await PackageJson.load(path.join(packagesDir, "_main"));
   let currentVersion = pkgJson.version;
   let nextVersion = semver.valid(givenVersion);
   if (nextVersion == null) {
