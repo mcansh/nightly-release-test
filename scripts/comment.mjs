@@ -11,7 +11,7 @@ import semver from "semver";
 let PACKAGE_VERSION_TO_FOLLOW = process.env.PACKAGE_VERSION_TO_FOLLOW;
 let GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
 let DRY_RUN = process.env.DRY_RUN;
-let DEBUG = process.env.ACTIONS_RUNNER_DEBUG || process.env.ACTIONS_STEP_DEBUG;
+let DEBUG = true; // process.env.ACTIONS_RUNNER_DEBUG || process.env.ACTIONS_STEP_DEBUG;
 
 if (!PACKAGE_VERSION_TO_FOLLOW) {
   console.error("PACKAGE_VERSION_TO_FOLLOW is required");
