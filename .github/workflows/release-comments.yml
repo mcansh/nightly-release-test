@@ -27,3 +27,4 @@ jobs:
         run: node ./scripts/comment.mjs
         env:
           PACKAGE_VERSION_TO_FOLLOW: "@mcansh/nightly-release-test-two"
+          GITHUB_REPOSITORY: ${{ github.repository }}
