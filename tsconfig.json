@@ -1,5 +1,9 @@
 {
   "files": [],
   "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "packages/one" }, { "path": "packages/two" }]
+  "references": [
+    { "path": "packages/one" },
+    { "path": "packages/two" },
+    { "path": "packages/three" }
+  ]
 }
