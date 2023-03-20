@@ -84,7 +84,7 @@ jobs:
 
       - name: 🏗 Build
         if: steps.version.outputs.NEXT_VERSION
-        run: npm run build
+        run: pnpm run build
 
       - name: 🏷 Push Tag
         if: steps.version.outputs.NEXT_VERSION
@@ -92,7 +92,7 @@ jobs:
 
       - name: 🚀 Publish
         if: steps.version.outputs.NEXT_VERSION
-        run: npm run publish
+        run: pnpm run publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NEXT_VERSION: ${{ steps.version.outputs.NEXT_VERSION }}

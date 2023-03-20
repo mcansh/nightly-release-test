@@ -57,10 +57,10 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          version: npm run changeset:version
+          version: pnpm run changeset:version
           commit: "chore: Update version for release"
           title: "chore: Update version for release"
-          publish: npm run changeset:release
+          publish: pnpm run changeset:release
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.NIGHTLY_PAT }}

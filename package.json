@@ -8,7 +8,7 @@
     "dev": "pnpm run --recursive dev",
     "build": "pnpm run --recursive build",
     "changeset": "changeset",
-    "changeset:release": "npm run build && changeset publish",
+    "changeset:release": "pnpm run build && changeset publish",
     "changeset:version": "changeset version",
     "comment": "node -r dotenv/config ./scripts/comment.mjs",
     "publish": "node ./scripts/publish.mjs"
