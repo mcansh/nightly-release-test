@@ -34,8 +34,8 @@ importers:
 
   packages/_main:
     specifiers:
-      '@mcansh/nightly-release-test-one': 1.2.16
-      '@mcansh/nightly-release-test-two': 1.2.16
+      '@mcansh/nightly-release-test-one': 1.2.17
+      '@mcansh/nightly-release-test-two': 1.2.17
     dependencies:
       '@mcansh/nightly-release-test-one': link:../one
       '@mcansh/nightly-release-test-two': link:../two
