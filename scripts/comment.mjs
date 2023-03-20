@@ -7,6 +7,7 @@
 
 import { execa } from "execa";
 import semver from "semver";
+import { trimNewlines } from "trim-newlines";
 
 let PACKAGE_VERSION_TO_FOLLOW = process.env.PACKAGE_VERSION_TO_FOLLOW;
 let GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
@@ -171,24 +172,25 @@ for (let pr of prs) {
  * @returns {Promise<number[]>}
  */
 async function getIssuesLinkedToPullRequest(prHtmlUrl) {
-  let query =
-    "\
-    query ($prHtmlUrl: URI!, $endCursor: String) {\
-      resource(url: $prHtmlUrl) {\
-        ... on PullRequest {\
-          closingIssuesReferences(first: 100, after: $endCursor) {\
-            nodes {\
-              number\
-            }\
-            pageInfo {\
-              hasNextPage\
-              endCursor\
-            }\
-          }\
-        }\
-      }\
-    }\
-  ";
+  let gql = String.raw;
+
+  let query = gql`
+    query ($prHtmlUrl: URI!, $endCursor: String) {
+      resource(url: $prHtmlUrl) {
+        ... on PullRequest {
+          closingIssuesReferences(first: 100, after: $endCursor) {
+            nodes {
+              number
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+          }
+        }
+      }
+    }
+  `;
 
   let result = await execa("gh", [
     "api",
@@ -197,7 +199,7 @@ async function getIssuesLinkedToPullRequest(prHtmlUrl) {
     "--field",
     `prHtmlUrl=${prHtmlUrl}`,
     "--raw-field",
-    `query=${query}`,
+    `query=${trimNewlines(query)}`,
   ]);
 
   if (result.stderr) {

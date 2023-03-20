@@ -26,6 +26,7 @@
     "glob": "^9.3.0",
     "prettier": "2.8.5",
     "semver": "7.3.8",
+    "trim-newlines": "^5.0.0",
     "typescript": "5.0.2"
   },
   "prettier": {}
