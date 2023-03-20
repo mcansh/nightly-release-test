@@ -8,13 +8,25 @@
 import { execa } from "execa";
 import semver from "semver";
 
-let DRY_RUN = process.env.DRY_RUN;
-
 let PACKAGE_VERSION_TO_FOLLOW = process.env.PACKAGE_VERSION_TO_FOLLOW;
+let GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
+let DRY_RUN = process.env.DRY_RUN;
+let DEBUG = process.env.ACTIONS_RUNNER_DEBUG || process.env.ACTIONS_STEP_DEBUG;
 
 if (!PACKAGE_VERSION_TO_FOLLOW) {
   console.error("PACKAGE_VERSION_TO_FOLLOW is required");
   process.exit(1);
+}
+
+if (!GITHUB_REPOSITORY) {
+  console.error("GITHUB_REPOSITORY is required");
+  process.exit(1);
+}
+
+function log(...args) {
+  if (DEBUG) {
+    console.log(...args);
+  }
 }
 
 let tagCommand = [
@@ -50,22 +62,22 @@ let isPreRelease = !isStable && !isNightly;
 // if prerelease && pre.0 OR stable, then we need to get the previous stable version
 // if pre.x, then we need to get the previous pre.x version
 if (isPreRelease) {
-  console.log(`pre-release: ${latest.clean}`);
+  log(`pre-release: ${latest.clean}`);
   let preRelease = semver.prerelease(latest.clean);
   if (preRelease.join(".") === "pre.0") {
-    console.log(`first pre-release: ${latest.clean}`);
+    log(`first pre-release: ${latest.clean}`);
     let stableTags = getStableTags(gitTags);
     previous = stableTags[0];
   }
 } else if (isStable) {
-  console.log(`stable: ${latest.clean}`);
+  log(`stable: ${latest.clean}`);
   let stableTags = getStableTags(gitTags);
   previous = stableTags[1];
 } else {
-  console.log(`nightly: ${latest.clean}`);
+  log(`nightly: ${latest.clean}`);
 }
 
-console.log({ latest, previous, isPreRelease, isStable, isNightly });
+log({ latest, previous, isPreRelease, isStable, isNightly });
 
 /**
  * @param {string} start
@@ -88,7 +100,7 @@ if (gitCommitsResult.stderr) {
 
 let gitCommits = gitCommitsResult.stdout.split("\n");
 
-console.log({ commitCount: gitCommits.length });
+log({ commitCount: gitCommits.length });
 
 /**
  * @param {string} sha
@@ -108,7 +120,7 @@ function getPrListCommand(sha) {
 }
 
 let prs = await findMergedPRs(gitCommits);
-console.log(prs);
+log(prs);
 
 for (let pr of prs) {
   let prComment = `🤖 Hello there,\n\nWe just published version \`${latest.clean}\` which includes this pull request. If you'd like to take it for a test run please try it out and let us know what you think!\n\nThanks!`;
@@ -117,15 +129,15 @@ for (let pr of prs) {
   let promises = [];
 
   if (!DRY_RUN) {
+    console.log(`https://github.com/${GITHUB_REPOSITORY}/pull/${pr.number}`);
     let commentCommand = ["pr", "comment", pr.number, "--body", prComment];
     let commentResult = promises.push(execa("gh", commentCommand));
     if (commentResult.stderr) {
       console.error(commentResult.stderr);
     }
 
-    console.log("commented on PR", pr);
-
     for (let issue of pr.issues) {
+      console.log(`https://github.com/${GITHUB_REPOSITORY}/issues/${issue}`);
       let issueCommentCommand = [
         "issue",
         "comment",
@@ -257,7 +269,7 @@ async function findMergedPRs(commits) {
 
       let linkedIssues = await getIssuesLinkedToPullRequest(pr.url);
       let issuesClosedViaBody = await getIssuesClosedViaBody(pr.body);
-      console.log({ linkedIssues, issuesClosedViaBody });
+      log({ linkedIssues, issuesClosedViaBody });
       let uniqueIssues = new Set([...linkedIssues, ...issuesClosedViaBody]);
 
       return {
