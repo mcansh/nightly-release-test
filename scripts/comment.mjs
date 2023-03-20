@@ -39,6 +39,8 @@ let gitTagsResult = await execa("git", [
   "%(refname:strip=2)",
 ]);
 
+log(gitTagsResult.command);
+
 if (gitTagsResult.stderr) {
   console.error(gitTagsResult.stderr);
   process.exit(gitTagsResult.exitCode);
@@ -83,6 +85,8 @@ let gitCommitsResult = await execa("git", [
   "./packages",
 ]);
 
+log(gitCommitsResult.command);
+
 if (gitCommitsResult.stderr) {
   console.error(gitCommitsResult.stderr);
   process.exit(gitCommitsResult.exitCode);
@@ -103,11 +107,12 @@ for (let pr of prs) {
 
   if (!DRY_RUN) {
     console.log(`https://github.com/${GITHUB_REPOSITORY}/pull/${pr.number}`);
-    let commentResult = promises.push(
+    let prCommentResult = promises.push(
       execa("gh", ["pr", "comment", pr.number, "--body", prComment])
     );
-    if (commentResult.stderr) {
-      console.error(commentResult.stderr);
+    log(prCommentResult.command);
+    if (prCommentResult.stderr) {
+      console.error(prCommentResult.stderr);
     }
 
     for (let issue of pr.issues) {
@@ -116,11 +121,13 @@ for (let pr of prs) {
       let issueCommentResult = promises.push(
         execa("gh", ["issue", "comment", issue, "--body", issueComment])
       );
+      log(issueCommentResult.command);
       if (issueCommentResult.stderr) {
         console.error(issueCommentResult.stderr);
       }
 
       let closeResult = promises.push(execa("gh", ["issue", "close", issue]));
+      log(closeResult.command);
       if (closeResult.stderr) {
         console.error(closeResult.stderr);
       }
@@ -169,6 +176,8 @@ async function getIssuesLinkedToPullRequest(prHtmlUrl) {
     "--raw-field",
     `query=${trimNewlines(query)}`,
   ]);
+
+  log(result.command);
 
   if (result.stderr) {
     console.error(result.stderr);
@@ -236,6 +245,7 @@ async function findMergedPRs(commits) {
         "--json",
         "number,title,url,body",
       ]);
+      log(prResult.command);
       if (prResult.stderr) {
         console.error(prResult.stderr);
         throw new Error(prResult.stderr);
