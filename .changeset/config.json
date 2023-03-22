@@ -6,7 +6,8 @@
     [
       "@mcansh/nightly-release-test",
       "@mcansh/nightly-release-test-one",
-      "@mcansh/nightly-release-test-two"
+      "@mcansh/nightly-release-test-two",
+      "@mcansh/nightly-release-test-three"
     ]
   ],
   "linked": [],
