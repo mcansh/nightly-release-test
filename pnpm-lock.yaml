@@ -45,6 +45,9 @@ importers:
   packages/one:
     specifiers: {}
 
+  packages/three:
+    specifiers: {}
+
   packages/two:
     specifiers: {}
 
