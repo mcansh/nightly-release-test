@@ -9,6 +9,8 @@ on:
       - "!release-manual"
       - "!release-manual-*"
 
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
 jobs:
   release:
     name: 🦋 Changesets Release
@@ -29,9 +31,6 @@ jobs:
 
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.NIGHTLY_PAT }}
 
       - name: 🟧 Setup pnpm
         uses: pnpm/action-setup@v2
@@ -61,11 +60,10 @@ jobs:
           commit: "chore: Update version for release"
           title: "chore: Update version for release"
           publish: pnpm run changeset:release
-          createGithubReleases: false
+          createGithubReleases: true
         env:
-          GITHUB_TOKEN: ${{ secrets.NIGHTLY_PAT }}
-          NPM_TOKEN: ${{ secrets.NIGHTLY_PAT }}
-          NODE_AUTH_TOKEN: ${{ secrets.NIGHTLY_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   comment:
     name: 📝 Comment on related issues and pull requests
