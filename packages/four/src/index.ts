@@ -1,0 +1,1 @@
+export { four } from "./lib";
