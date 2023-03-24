@@ -1,6 +1,6 @@
 # @mcansh/nightly-release-test-two
 
-## 1.3.2-pre.0
+## 1.3.2
 
 ## 1.3.1
 

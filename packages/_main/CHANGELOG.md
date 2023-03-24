@@ -1,15 +1,15 @@
 # @mcansh/nightly-release-test
 
-## 1.3.2-pre.0
+## 1.3.2
 
 ### Patch Changes
 
 - 4247d8b: chore: add a fourth package
 - Updated dependencies [4247d8b]
-  - @mcansh/nightly-release-test-four@1.3.2-pre.0
-  - @mcansh/nightly-release-test-one@1.3.2-pre.0
-  - @mcansh/nightly-release-test-two@1.3.2-pre.0
-  - @mcansh/nightly-release-test-three@1.3.2-pre.0
+  - @mcansh/nightly-release-test-four@1.3.2
+  - @mcansh/nightly-release-test-one@1.3.2
+  - @mcansh/nightly-release-test-two@1.3.2
+  - @mcansh/nightly-release-test-three@1.3.2
 
 ## 1.3.1
 
