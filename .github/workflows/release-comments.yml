@@ -11,27 +11,11 @@ jobs:
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v3
-
-      - name: 🏷️ Fetch git tags
-        run: git fetch --tags origin
-
-      - name: 🟧 Setup pnpm
-        uses: pnpm/action-setup@v2
         with:
-          version: 7
+          fetch-depth: 0
 
-      - name: ⎔ Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: pnpm
-          registry-url: "https://npm.pkg.github.com"
-
-      - name: 📥 Install deps
-        run: pnpm install --frozen-lockfile
-
-      - name: 📝 Comment on issues and pull requests
-        run: node ./scripts/comment.mjs
+      - name: 📝 Comment on issues
+        uses: mcansh/release-comment-action@v0.1.3
         env:
           PACKAGE_VERSION_TO_FOLLOW: "@mcansh/nightly-release-test-two"
           GITHUB_REPOSITORY: ${{ github.repository }}
