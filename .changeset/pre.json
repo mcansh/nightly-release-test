@@ -1,0 +1,14 @@
+{
+  "mode": "pre",
+  "tag": "pre",
+  "initialVersions": {
+    "@mcansh/nightly-release-test": "1.3.1",
+    "@mcansh/nightly-release-test-four": "1.3.1",
+    "@mcansh/nightly-release-test-one": "1.3.1",
+    "@mcansh/nightly-release-test-three": "1.3.1",
+    "@mcansh/nightly-release-test-two": "1.3.1"
+  },
+  "changesets": [
+    "tame-bats-vanish"
+  ]
+}
