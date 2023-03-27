@@ -18,7 +18,7 @@
     "@changesets/cli": "^2.26.1",
     "@npmcli/package-json": "^3.0.0",
     "@tsconfig/node16": "1.0.3",
-    "@types/node": "18.15.7",
+    "@types/node": "18.15.10",
     "@types/semver": "7.3.13",
     "dotenv": "^16.0.3",
     "execa": "^7.1.1",
