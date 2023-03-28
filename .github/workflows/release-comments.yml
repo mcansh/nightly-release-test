@@ -16,8 +16,6 @@ jobs:
 
       - name: 📝 Comment on issues
         uses: mcansh/release-comment-action@0.2.0
-        env:
+        with:
           DIRECTORY_TO_CHECK: "./packages"
           PACKAGE_VERSION_TO_FOLLOW: "@mcansh/nightly-release-test-two"
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GH_TOKEN: ${{ github.token }}
